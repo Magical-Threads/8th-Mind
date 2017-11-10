@@ -1,0 +1,75 @@
+/* here you can put your own css to customize and override the theme */
+
+/***
+Rounded Portlets
+***/
+/*
+.portlet {
+	border-radius: 4px !important;
+}
+
+.portlet .portlet-title {
+	border-radius: 4px 4px 0px 0px !important;
+}
+
+.portlet .portlet-body,
+.portlet .portlet-body .form-actions  {
+	border-radius: 0px 0px 4px 4px !important;
+}
+*/
+
+/*
+Change Quick Sidebar Width
+*/
+
+/*
+.page-quick-sidebar-wrapper {
+  right: -370px;
+  width: 370px;
+}
+
+.page-quick-sidebar-open.page-quick-sidebar-push-content .page-sidebar-wrapper {
+  margin-left: -370px;
+}
+
+.page-quick-sidebar-open.page-quick-sidebar-push-content .page-footer {
+  margin-right: 370px;
+  margin-left: -370px;
+}
+
+.page-sidebar-reversed.page-quick-sidebar-open.page-quick-sidebar-push-content .page-sidebar-wrapper {
+  margin-right: 370px;
+}
+
+.page-quick-sidebar-open.page-quick-sidebar-push-content.page-quick-sidebar-full-height .page-header {
+  margin-left: -370px;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-list {
+  width: 370px !important;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-item {
+  width: 370px !important;
+  margin-left: 370px;
+}
+
+.page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-content-item-shown .page-quick-sidebar-list {
+  margin-left: -370px;
+}
+*/
+ul.users-list{list-style-type: none;margin: 10px 0px;
+padding: 0;}
+.users-list li{padding:10px 0px;}
+.users-list li a{color: #555;}
+.card-number{font-weight:bold;text-decoration: none;color:#fcb040;float:right}
+.users-list li a:hover{text-decoration: none;}
+.name{font-weight:bold; }
+ul.promotion-list{list-style-type: none;margin: 10px 0px;
+padding: 0;}
+.promotion-list li{padding:10px 0px;margin:10px 0px;}
+.promotion-list li a{color: #555;}
+.promotion-list li a:hover{text-decoration: none;}
+.promotion-list li .image img{width:50px; height:50px;}
+
+.promotion-list li .title{color: #555;font-weight:bold;}
