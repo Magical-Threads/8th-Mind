@@ -1,0 +1,13 @@
+{
+  "name": "frontend",
+  "dependencies": {
+    "masonry": "^4.2.0",
+    "imagesloaded": "^4.1.3",
+    "isotope": "^3.0.4",
+    "mojs": "^0.288.2",
+    "isotope-packery": "^2.0.0",
+    "isotope-fit-columns": "^1.1.3",
+    "packery": "^2.1.1",
+    "flickity": "^2.0.10"
+  }
+}

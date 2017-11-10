@@ -1,0 +1,1 @@
+/Users/marioluevanos/Web Development/_8thmind/frontend/tmp/funnel-input_base_path-uV9O0d0d.tmp/serializers/embedded-records-mixin.js

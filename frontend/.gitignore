@@ -1,0 +1,19 @@
+# Created by https://www.gitignore.io/api/ember
+
+### Ember ###
+# see https://github.com/ember-cli/ember-cli/blob/master/blueprints/app/files/gitignore
+# compiled output
+
+# dependencies
+/node_modules
+/bower_components
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage/*
+/libpeerconnection.log
+npm-debug.log
+testem.log
+.DS_Store
+# End of https://www.gitignore.io/api/ember

@@ -1,0 +1,1 @@
+/Users/marioluevanos/Web Development/_8thmind/frontend/tmp/broccoli_merge_trees-input_base_path-JRLmw5dq.tmp/1/modules/ember-data/-private.js

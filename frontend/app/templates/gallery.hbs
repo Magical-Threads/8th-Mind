@@ -1,0 +1,60 @@
+<section id="page-gallery">
+
+	<div class="gallery-container">
+		<div class="page-article-hero">
+			<figure style='background-image: url({{serverURL}}storage/articles/{{model.article.image}})'>
+				<img src='{{serverURL}}storage/articles/{{model.article.image}}' class="desktop-hide" alt="">
+			</figure>
+		</div>
+		<div class="article-heading"><h1 class="article-title">{{model.article.title}} Gallery</h1></div>
+		<div class="article-body">
+			<div class="article-meta">
+				<span class="article-icon">
+					<svg viewBox="0 0 11.05 16.8"><polyline points="8.6,15.5 1.2,8.2 8.6,1.2"></polyline></svg>
+				</span>
+				{{#link-to  "article" model.article.id}} Back to the Challenge {{/link-to}}
+			</div>
+
+			<div class="article-wrap">
+
+				{{!-- Submission Type - Photo --}}
+				{{#if (eq model.article.submissionType "Photo")}}
+					{{#if (eq model.gallery.length 0)}}
+						<div class="be-the-first">
+							<div class="text">
+								<p>Be the first to submit to</p>
+								<h4 class='title'>{{model.article.title}} gallery</h4>
+								<button id="button-show-upload" type="button" class="button button-blue" {{action "showGallerySubmission"}}>Create Your Submission</button>
+							</div>
+							{{gallery-submission model=model}}
+						</div>
+					{{else}}
+						{{#gallery-submission model=model}}
+							<button id="button-show-upload" type="button" class="button button-blue" {{action "showGallerySubmission"}}>Create Your Submission</button>
+						{{/gallery-submission}}
+					{{/if}}
+					
+					{{#isotope-grid}}
+						{{#each model.gallery as |gallery index|}}
+							{{gallery-post gallery=gallery model=model session=session data-submission-id=gallery.id}}
+						{{/each}}
+					{{/isotope-grid}}
+					
+				{{/if}}
+
+			</div><!-- article-wrap -->
+
+			{{#each model.pagination as |pagination index|}}
+				<ul class="pagination">
+					{{#if (gt pagination.page 1)}}
+						<button {{action "prevPage"}}>Prev</button>
+					{{/if}}
+					{{#if (lt pagination.page pagination.total_pages)}}
+						<button {{action "nextPage"}}>Next</button>
+					{{/if}}
+				</ul>
+			{{/each}}
+
+		</div>
+	</div>
+</section>

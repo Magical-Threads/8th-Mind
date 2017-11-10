@@ -1,0 +1,635 @@
+#page-article {
+	position: relative;
+	padding: 0;
+	background: white;
+}
+
+#page-article .page-article-hero {
+	padding-bottom: 35%;
+	background: black;
+	position: relative;
+	overflow: hidden;
+
+	@include bp(1) {
+		padding-bottom: 60%;
+	}
+
+	.post-type {
+		font-size: 1.15vw;
+		font-family: $font-bold;
+		position: absolute;
+		transform: rotate(-90deg);
+		transform-origin: 0% 0%;
+		text-transform: uppercase;
+		bottom: vw(30);
+		left: vw(30);
+		color: white;
+		z-index: 1;
+		a {
+			color: inherit;
+			text-decoration: none;
+		}
+	}
+	.post-tag {
+		position: absolute;
+		top: vw(30);
+		left: vw(30);
+		background: $color-yellow;
+		z-index: 1;
+	}
+	figure {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		opacity: 0.9;
+		background: transparent 50% 50%/cover no-repeat;
+		transform: translate(-50%, -50%);
+		width: 100vw;
+		height: 100vh;
+		@include bp(1) {
+			top: 0; right: 0; bottom: 0; left: 0;
+			opacity: 0.9;
+			background: transparent 50% 50%/cover no-repeat;
+			transform: translate(0%, 0%);
+			width: auto;
+			height: auto;
+		}
+	}
+}
+
+#page-article .page.article-content {
+	position: relative;
+}
+
+#page-article .article-heading {
+	position: relative;
+	padding: vw(30) vw(40);
+	margin: -50% 0 vw(60) vw(140);
+	max-width: 60%;
+	display: inline-block;
+	z-index: 1;
+
+	@include bp(1) {
+		position: relative;
+		width: 90%;
+		bottom: initial;
+		left: initial;
+		top: initial;
+		right: initial;
+		display: block;
+		padding: vw(80) vw(80) vw(40) !important;
+		margin: vw(-50) auto 0;
+		background: white;
+		max-width: none;
+		transform: translate(0, 0);
+	}
+
+	&:before {
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: url(../../assets/images/texture-blue.png) 50% 50%/cover no-repeat;
+		opacity: 0.975;
+		display: flex;
+		z-index: -1;
+		@include bp(1) {
+			background: white;
+		}
+	}
+
+
+
+	&:after {
+		content: '';
+		width: vw(45);
+		height: vw(32);
+		bottom: vw(-15); left: vw(33);
+		position: absolute;
+		background: url(../assets/images/icon-equal-lime.svg) no-repeat 50% 50%/contain;
+		transform: rotate(90deg);
+		z-index: 1;
+		@include bp(1) {
+			content: initial;
+			display: none;
+		}
+	}
+
+	.icon {
+		fill: $color-lime;
+		stroke: transparent;
+		width: vw(45);
+		height: vw(32);
+		bottom: vw(-15); left: vw(33);
+		position: absolute;
+		transform: rotate(90deg);
+		z-index: 1;
+		@include bp(1) {
+			content: initial;
+			display: none;
+		}
+	}
+
+	.article-title {
+		color: white;
+		font: normal 4.5vw/0.85 $font-bold;
+		margin: 0;
+		position: relative;
+		z-index: 1;
+		@include bp(1) {
+			font-size: 6vw;
+			text-transform: uppercase;
+			color: black;
+		}
+	}
+}
+
+[data-page-type='challenge'] .article-heading:before {
+	filter: brightness(100%) hue-rotate(295deg) saturate(175%);
+}
+
+[data-page-type='challenge'] .post-tag {
+	background: $color-orange;
+}
+
+[data-page-type='challenge'] .page-article-hero .post-type {
+	color: $color-orange;
+	bottom: initial;
+	top: vw(240);
+	left: vw(30);
+	display: block;
+	z-index: 1;
+	transform-origin: 0% 0%;
+	text-align: right;
+	transform: rotate(-90deg) translate(0, 0);
+	@include bp(0) {
+		font-size: 3vw;
+		top: vw(600);
+		left: vw(60);
+	}
+}
+
+[data-page-type='challenge'] {
+
+	.article-countdown-timer {
+		position: relative;
+		text-align: center;
+
+		@include bp(0) {
+			padding: 0 vw(30);
+			width: 80%;
+			margin: auto;
+		}
+
+		.post-aside-title {
+			@include bp(0) {
+			
+				padding: 0;
+				font-size: 3vw;
+				position: absolute;
+				bottom: 50%; left: 0;
+				transform: rotate(-90deg) translate(-50%, 0%);
+				transform-origin: 0% 100%;
+
+				padding: 0;
+				font-size: 3vw;
+				position: absolute;
+				top: 0; left: 0;
+				transform: rotate(-90deg);
+				transform-origin: 100% 50%;
+			}
+		}
+	}
+
+	.countdown-timer {
+		display: flex;
+		margin: 0 -1%;
+	}
+	.countdown-timer-row {
+		margin: 1%;
+		width: 23%;
+		padding: vw(10) 0;
+		background: $color-offwhite;
+		text-align: center;
+		strong {
+			display: block;
+		}
+	}
+
+	.icon {
+		fill: $color-lime;
+		stroke: transparent;
+		width: vw(45);
+		height: vw(32);
+		top: 50%; left: 0;
+		position: absolute;
+		transform: translate(-50%, -50%);
+		z-index: 1;
+	}
+	.button {
+		margin-top: vw(30);
+	}
+}
+
+
+#page-article .article-meta {
+	display: flex;
+	margin: vw(15) 0 vw(30);
+	align-items: center;
+	@include bp(1) {
+		justify-content: space-between;
+		margin: vw(30) 0 vw(60);
+	}
+}
+
+#page-article .article-social-media {
+	margin-left: vw(60);
+}
+
+#page-article .article-body {
+	display: flex;
+	justify-content: space-between;
+	@include bp(1) {
+		display: flex;
+		flex-direction: column;
+	}
+	.article-meta-text {
+		font: normal 1.5vw $font-bold;
+		position: relative;
+		display: flex;
+		align-items: center;
+		margin: 0;
+		align-items: center;
+		@include bp(1) {
+			font-size: 2.125vw;
+			margin: 0;
+		}
+		@include bp(0) {
+			font-size: 3vw;
+		}
+	}
+	
+	.article-challenge-date {
+		color: $color-orange;
+		.article-challenge-label {
+			display: inline-block;
+			position: relative;
+			&:first-of-type {
+				margin-right: vw(35);
+			}
+			&:first-of-type:before {
+				content: '';
+				position: absolute;
+				top: 50%; right: 0;
+				width: vw(30);
+				height: 1px;
+				background: $color-orange;
+				transform: translate(100%, -50%);
+			}
+			@include bp(0) {
+				&:first-of-type {
+					margin-right: vw(60);
+				}
+				span {
+					display: block;
+				}
+				&:before {
+					display: none;
+				}
+			}
+		}
+	}
+	.article-author { color: $color-teal; }
+
+	.article-icon {
+		display: inline-block;
+		position: relative;
+		width: vw(16);
+		height: vw(16);
+		margin-right: vw(5);
+		svg {
+			position: absolute;
+			top: 50%; 
+			left: 50%;
+			fill:none;
+			stroke-miterlimit:10;
+			stroke-width:3.45px;
+			stroke: $color-teal;
+			width: 80%;
+			display: inline-block;
+			transform: translate(-50%, -50%);
+		}
+		@include bp(2) {
+			width: vw(32);
+			height: vw(32);
+		}
+	}
+
+	article {
+		width: 65%;
+		padding-left: vw(180);
+		@include bp(2) {
+			img {
+				width: 100%;
+			}
+		}
+		@include bp(1) {
+			width: 80%;
+			margin: auto;
+			padding: 0;
+		}
+
+		.article-hightlight {
+			font-family: $font-bold;
+			display: inline-block;
+			.lines {
+				padding: vw(2.5) vw(5);
+				display: inline-block !important;
+				margin-bottom: vw(5);
+				color: $color-offwhite;
+				background: $color-black;
+				white-space: nowrap;
+				@include bp(0) {
+					padding: vw(5) vw(20);
+				}
+			}
+		}
+		h2,
+		h3 {
+			font-family: $font-bold;
+		}
+
+		iframe {
+			width: 100%;
+			height: 50.85vh;
+		}
+		figure.article-figure {
+			margin: vw(60) 0 vw(60) -12.5vw;
+			@include bp(0) {
+				margin: vw(60) 0;
+			}
+		}
+		img {
+			width: 100%;
+			display: inline-block;
+			vertical-align: bottom;
+			&[style*='float:right'] {
+				margin: 0 0 vw(60) vw(30)
+			}
+			&[style*='float:left'] {
+				margin: 0 0 vw(60) vw(30)
+			}
+			@include bp(0) {
+				width: 100%;
+			}
+			}
+		hr:last-of-type {
+			margin: vw(60) 0;
+			border: none;
+			height: 6px;
+			width: 40px;
+			background: $color-lime;
+		}
+		blockquote {
+			margin: 0 0 vw(30) vw(40);
+			padding: 0 0 0 vw(5);
+			border-left: 6px solid $color-lime;
+			clear: both;
+			@include bp(1) {
+				margin: 0 0 vw(30) 0;
+			}
+			@include bp(0) {
+				margin: 0 0 vw(30) 0;
+				padding: 0 0 0 vw(20);
+			}
+			.article-hightlight .lines {
+				background: $color-offwhite;
+				color: $color-black;
+			}
+			p,
+			.lines:last-of-type {
+				margin: 0;
+			}
+		}
+	}
+
+	article .contest-files {
+		.contest-file-entries {
+			display: flex;
+		}
+		figure {
+			margin: 0;
+		}
+		.user-name {
+			font-size: 1vw;
+			margin: 0;
+		}
+	}
+
+	.article-comments {
+		margin-bottom: vw(60);
+	}
+
+	
+}
+
+[data-page-type='challenge'] .article-icon svg {
+	stroke: $color-orange;
+}
+
+.join {
+	background: $color-teal;
+	color: lighten($color-gray, 0%);
+	margin: 0 vw(180);
+	padding: vw(40);
+	display: flex;
+	position: relative;
+	bottom: vw(-60);
+	margin-bottom: vw(60);
+	@include bp(1) {
+		margin: 0;
+		display: flex;
+		align-items: center;
+		padding: vw(90);
+		bottom: 0;
+	}
+	.join-text {
+		width: 75%;
+		position: relative;
+		@include bp(1) {
+			width: 60%;
+		}
+		p {
+			margin: 0;
+			font-family: $font-regular;
+			line-height: 0.85;
+			font-size: 3vw;
+			text-transform: uppercase;
+			strong {
+				font-family: $font-heavy;
+			}
+			@include bp(1) {
+				font-size: 6vw;
+			}
+		}
+	}
+	.join-form {
+		width: 25%;
+		height: 100%;
+		@include bp(1) {
+			width: 40%;
+		}
+		.button {
+			font-size: 1.5vw;
+			margin: vw(15) 0;
+			padding: vw(20) vw(60);
+			@include bp(1) {
+				font-size: 4vw;
+				padding: vw(30) vw(60);
+			}
+		}
+	}
+}
+
+@media print {
+	.article-social-media,
+	aside.post-row {
+		display: none;
+	}
+
+	.page-article-hero {
+		figure {
+		}
+	}
+
+	.article-heading {
+		max-width: 100%;
+		margin-top: vw(30);
+		transform: initial;
+		&:before {
+			content: initial;
+		}
+		.article-title {
+			color: black;
+		}
+	}
+
+	.article-body {
+		article {
+			width: 87.2%;
+		}
+		.article-author {
+			color: black;
+		}
+		iframe,
+		span[data-pin-href*="pinterest"] {
+			display: none;
+		}
+		.article-comments {
+			display: none;
+		}
+	}
+
+	.join {
+		color: black;
+		margin-bottom: 0;
+		padding-bottom: vw(90);
+		bottom: 0;
+		background: white;
+
+		.join-text {
+			p strong {
+				font: inherit;
+				font-weight: normal;
+			}
+		}
+	}
+}
+
+
+@media print {
+	img {
+		page-break-inside: avoid;
+	}
+	a {
+		color: black;
+		&:hover {
+			color: black;
+		}
+	}
+	.button {
+		&.button-orange {
+			background: black;
+		}
+	}
+	img.desktop-hide {
+		width: 100%;
+		height: 100%;
+		top: 0; right: 0; bottom: 0; left: 0;
+		display: block;
+		position: absolute;
+	}
+
+	#header {
+		height: vw(200);
+		padding: vw(20) vw(40);
+		position: relative;
+		background: white;
+
+		.header-collapsable-nav,
+		.header-nav.login-register {
+			display: none;
+		}
+
+		.header-logo {
+			margin: 0;
+			&:before {
+				content: '8th Mind';
+				color: black;
+				font: 4vw/1 "blenderpro-heavy", sans-serif;
+				top: vw(40); left: vw(100);
+				position: absolute;
+			}
+
+			img {
+				filter: invert(100%);
+			}
+		}
+	}
+
+	#footer {
+		padding: vw(60) vw(90);
+		background: white;
+		border-top: 1px solid black;
+
+		.footer-logo {
+			img {
+				filter: invert(100%);
+			}
+			span {
+				color: black;
+			}
+		}
+
+		.social-media {
+			.social-bg {
+				background: none;
+			}
+			.social-icon.twitter:before,
+			.social-icon.facebook:before,
+			.social-icon.instagram:before {
+				filter: invert(100%);
+			}
+		}
+		#mc_embed_signup {
+			display: none;
+		}
+		a,
+		p.copyright,
+		p.policy a {
+			color: black;
+		}
+	}
+}

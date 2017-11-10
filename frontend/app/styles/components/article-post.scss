@@ -1,0 +1,179 @@
+.article-post {
+	float: left;
+	position: relative;
+	width: 100%;
+	@include bp(1) {
+		float: none;
+	}
+
+	// Hide all post types except the hero post
+	&:not(.post-hero) .post-type {
+		display: none;
+	}
+
+	.post-title {
+		font: normal 1.5vw/1 $font-heavy;
+		text-transform: uppercase;
+		margin: 0 0 vw(5);
+		@include bp(1) {
+			color: black;
+			font-size: 6vw !important;
+			margin-bottom: vw(30);
+		}
+		a {
+			color: inherit;
+			text-decoration: none;
+		}
+	}
+	.post-tag {
+		font: normal 2.25vw/1 $font-heavy;
+		width: vw(48);
+		height: vw(48);
+		position: absolute;
+		color: white;
+		background: black;
+		line-height: vw(48);
+		text-align: center;
+		display: block;
+		z-index: 2;
+		@include bp(1) {
+			width: vw(128);
+			height: vw(128);
+			line-height: vw(128);
+			font-size: 7vw;
+		}
+		> a {
+			display: inline;
+			color: inherit;
+			text-decoration: none;
+			letter-spacing: -0.1em;
+		}
+		&:before {
+			content: '';
+			position: absolute;
+			top: 0; right: 0; bottom: 0; left: 0;
+			background: rgba(black, 0.9);
+			mix-blend-mode: overlay;
+			transition:
+				transform 0s ease-in 0.35s,
+				opacity 1s ease-out;
+			transform: scale(0);
+			opacity: 0;
+			z-index: -1;
+		}
+		&:hover:before {
+			transform: scale(0.85);
+			opacity: 1;
+			transition: all 0.1s ease-out;
+		}
+	}
+
+	@include bp(1) {
+		// GLobal media query styles for tags
+		&:nth-of-type(odd) .post-tag {
+			top: vw(60)!important;
+			left: vw(60) !important;
+			right: initial !important;
+			transform: none!important;
+		}
+		&:nth-of-type(even) .post-tag {
+			top: vw(60)!important;
+			right: vw(60) !important;
+			left: initial !important;
+			transform: none!important;
+		}
+	}
+
+	.post-thumb {
+		position: absolute;
+		background: black;
+		top: 0; right: 0; bottom: 0; left: 0;
+		overflow: hidden;
+		@include bp(1) {
+			position: relative;
+			padding-bottom: 60%;
+		}
+		a {
+			display: block;
+			height: 100%;
+			@include bp(1) {
+				// display: inline-block;
+				// height: auto;
+				position: absolute !important;
+				top: 0; right: 0; bottom: 0; left: 0;
+				z-index: 1;
+				&:before {
+					display: none;
+				}
+			}
+		}
+		figure {
+			position: absolute;
+			top: 0; right: 0; bottom: 0; left: 0;
+			background: transparent 50% 50%/cover no-repeat;
+			transform: scale(1.015);
+			transition: all 0.3s ease-out;
+		}
+	}
+	&:hover .post-thumb figure {
+		transform: scale(1.03)!important;
+	}
+	.post-desc {
+		font: 400 1.15vw/1 $font-regular;
+		color: $color-gray;
+		margin: 0 0 vw(5);
+		@include bp(1) {
+			font-size: 4vw;
+		}
+	}
+
+	.post-author {
+		font: 1.15vw $font-bold;
+		text-transform: uppercase;
+		color: $color-gray-light;
+		@include bp(1) {
+			display: block;
+			font-size: 4vw;
+			margin: vw(40) 0;
+		}
+
+		&[desktop] {
+			display: none;
+		}
+
+	}
+
+	.post-type {
+		font-size: 1.15vw;
+		position: absolute;
+		transform: rotate(-90deg);
+		transform-origin: 0% 0%;
+		text-transform: uppercase;
+		bottom: vw(30);
+		left: vw(30);
+		color: white;
+		z-index: 1;
+		@include bp(1) {
+			display: none;
+		}
+		a {
+			color: inherit;
+			text-decoration: none;
+		}
+	}
+
+
+	body & .post-text {
+		@include bp(1) {
+			position: relative !important;
+			width: 90%  !important;
+			margin: auto;
+			bottom: initial !important;
+			left: initial !important;
+			top: initial !important;
+			padding: vw(80) vw(80) vw(100) !important;
+			margin-top: vw(-50) !important;
+			background: white !important;
+		}
+	}
+}

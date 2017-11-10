@@ -1,0 +1,1 @@
+/Users/marioluevanos/Web Development/_8thmind/frontend/app/helpers/category-view-all-text.js

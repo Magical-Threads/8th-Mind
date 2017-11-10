@@ -1,0 +1,18 @@
+{{yield}}
+<form id="add-submission" method="POST">
+	<div class="form-group">
+		<label for="submissionTitle">Title</label>
+		{{input name="submissionTitle" type="text" id="submissionTitle"}}
+	</div>
+	<div class="form-group">
+		<label for="caption">Caption</label>
+		{{input name="caption" type="text" id="caption"}}
+	</div>
+</form>
+<form id="add-asset" method="POST">
+	<div class="form-group">
+		<label for="assetFile">File Upload</label>
+		{{input name="assetFile" type="file" id="assetFile"}}
+	</div>
+</form>
+<button id="button-submit" {{action 'create' model.article.id}} type="button" class="button button-teal hidden">Submit</button>

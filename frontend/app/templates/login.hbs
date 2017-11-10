@@ -1,0 +1,19 @@
+<section id='page-register-login'>
+	<div class='form'>
+		<h2>Login to your account</h2>
+		<form>
+			<div class="form-input">
+				{{input value=email  type="email" placeholder="Email"}}
+				{{display-errors errors=errors.email showErrors=showErrors class='form-error'}}
+			</div>
+			<div class="form-input">
+				{{input value=password type="password" placeholder="Password" }}
+				{{display-errors errors=errors.password showErrors=showErrors class='form-error'}}
+			</div>
+			<button {{action 'login'}}><span class="button button-teal">Login</span></button>
+		</form>
+		<p>{{#link-to 'forget-password' class='login'}}<span>Forgot your password?</span>{{/link-to}}</p>
+	</div>
+</section>
+
+

@@ -1,0 +1,37 @@
+{{#if model.article.allowGallery}}
+
+	<div class="challenge-submissions">
+
+		{{#if (eq model.article.submissionType "Photo")}}
+
+			{{#each model.article.submissions as |submission index|}}
+
+				{{#if (gt index 2)}}
+
+					{{challenge-submission
+						submission=submission
+						session=model.session
+					}}
+					
+				{{/if}}
+			{{/each}}
+		{{/if}}
+
+	</div>
+
+	{{#link-to 'article.gallery' model.article.articleID }}
+		<button>View All</button>
+	{{/link-to}}
+
+{{/if}}
+
+{{#if model.article.allowSubmission}}
+
+	{{article-countdown-timer article=model.article}}
+	{{#link-to "article.gallery" model.article.articleID }}
+		<button class='button button-orange'>Submit Your Entry</button>
+	{{/link-to}}
+
+{{/if}}
+
+{{yield}}

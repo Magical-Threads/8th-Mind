@@ -1,0 +1,143 @@
+.challenge-submission {
+	position: relative;
+	width: 49%;
+	margin: 0.5%;
+
+	.challenge-submission-images {
+		position: relative;
+		
+		overflow: hidden;
+	}
+
+	.challenge-submission-img {
+		position: relative;
+		img {
+			width: 100%;
+			vertical-align: bottom;
+		}
+	}
+	.challenge-submission-edit {
+		position: absolute;
+		top: vw(30); right: vw(30);
+		z-index: 1;
+		button {
+			border-radius: 1px;
+			text-transform: uppercase;
+			font: normal 1vw $font-bold;
+			text-transform: uppercase;
+			border: none;
+			&.delete {
+				background: $color-red;
+				color: white;
+			}
+		}
+	}
+
+
+	.challenge-submission-data {
+		padding: vw(16);
+		background: $color-offwhite;
+	}
+	.challenge-submission-title {
+		h2 {
+			font-size: 1.5vw;
+			text-transform: uppercase;
+			margin: 0 0 vw(5);
+			a {
+				color: black;
+				&:hover {
+					color: $color-orange;
+				}
+			}
+		}
+	}
+	.challenge-submission-username {
+		p {
+			font: 1.15vw $font-bold;
+			text-transform: uppercase;
+			margin: 0 0 vw(10);
+		}
+	}
+
+	.challenge-submission-upvote {
+		display: inline-block;
+		position: relative;
+		cursor: pointer;
+		&:hover {
+			.upvote-counter {
+				color: $color-red;
+			}
+			.icon-sprite {
+				fill: $color-red;
+			}
+		}
+		.upvote-counter {
+			color: $color-gray-light;
+			font: 1.15vw $font-bold;
+			display: inline-block;
+			position: relative;
+			transition: all 300ms ease-out;
+		}
+		.icon-heart {
+			float: right;
+			width: 14px;
+			height: 14px;
+			margin-left: 4px;
+			display: inline-block;
+			position: relative;
+		}
+		.icon-sprite {
+			fill: $color-gray-light;
+			transition: all 300ms ease-out;
+		}
+		.heart--like {
+			color: $color-red;
+			fill: $color-red;
+		}
+		.heart--unlike {
+			fill: $color-gray-light;
+		}
+	}
+}
+
+.challenge-submissions {
+	width: 100%!important;
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	margin: 0 -0.5%;
+	&:after {
+		content: '';
+		display: table;
+		clear: both;
+	}
+	@include bp(1) {
+		
+	}
+	h4 {
+		margin: 0;
+	}
+	.challenge-form-group {
+		position: relative;
+		display: none;
+		&.active {
+			display: flex;
+		}
+		form {
+			display: flex;
+		}
+		.form-group {
+			align-items: center;
+			display: flex;
+			label {
+				padding: 0 vw(10);
+				white-space: nowrap;
+				text-transform: uppercase;
+			}
+		}
+		input {
+			padding: vw(5) vw(5);
+		}
+	}
+}

@@ -1,0 +1,92 @@
+<header id='header'>
+	<div class='header-logo'>
+		{{#link-to 'index'}}<img src='{{rootUrl}}assets/images/logo.svg'>{{/link-to}}
+	</div>
+	<button class='header-nav-toggle' {{action 'toggleNav'}}>
+		<svg viewBox='0 0 64 64'>
+			<rect y='8' width='64' height='6'/>
+			<rect y='28' width='64' height='6'/>
+			<rect y='48' width='64' height='6'/>
+		</svg>
+	</button>
+	<div class='header-collapsable-nav'>
+		<nav class='header-nav main-navigation'>
+			<span>{{#link-to 'articles'}}Articles{{/link-to}}</span>
+			<span>{{#link-to 'challenges'}}Challenges{{/link-to}}</span>
+			<span>{{#link-to 'create'}}Create{{/link-to}}</span>
+		</nav>
+		<nav class='header-nav login-register'>
+			{{#if session.isAuthenticated}}
+				<div class='login-register-loggedin'>
+					<span class='name'>{{session.data.authenticated.userFirstName}} {{session.data.authenticated.userLastName}}</span>
+					{{#link-to 'change-password'}}<span class='button'>Change Password</span>{{/link-to}}
+					<a {{action 'logout'}} href='#'><span class='button'>Logout</span></a>
+				</div>
+			{{else}}
+				<p class='login-register-message'>Join the 8th Mind Community</p>
+				{{#link-to 'register' class='register'}}<span class='button button-gray'>Register</span>{{/link-to}}
+				{{#link-to 'login' class='login'}}<span class='button'>Login</span>{{/link-to}}
+			{{/if}}
+		</nav>
+	</div>
+</header>
+
+<div class='flash-messages'>
+	{{#each flashMessages.queue as |flash|}}
+		{{flash-message flash=flash}}
+	{{/each}}
+</div>
+
+{{outlet}}
+
+<footer id='footer'>
+	<div class='col footer-logo'>
+		<img src='{{rootUrl}}assets/images/logo.svg'>
+		<span>8th Mind</span>
+	</div>
+	<div class='col footer-copy'>
+		<div class="social-media">
+			<div class="social-icon twitter">
+				<a class='social-bg' href="https://twitter.com/8thmind"></a>
+			</div>
+			<div class="social-icon facebook">
+				<a class='social-bg' href="https://www.facebook.com/8thmind"></a>
+			</div>
+			<div class="social-icon instagram">
+				<a class="social-bg" href="https://www.instagram.com/8thmind/"></a>
+			</div>
+		</div>
+		<div id='mc_embed_signup'>
+			<form class="validate" id="mc-embedded-subscribe-form" action="//8thmind.us16.list-manage.com/subscribe/post?u=d4d629f82da1338a5bc8c2ff1&amp;id=4922fbdc48" method="post" name="mc-embedded-subscribe-form" target="_blank" novalidate="">
+				<div id="mc_embed_signup_scroll">
+					<input class="required email" id="mce-EMAIL" type="email" placeholder="Enter Your Email" value="" name="EMAIL"/>
+					<input class="button button-blue" id="mc-embedded-subscribe" type="submit" value="Subscribe" name="subscribe"/>
+				</div>
+				<div class="clear" id="mce-responses">
+					<div class="response" id="mce-error-response" style="display:none">
+						<div class="icon"></div>
+					</div>
+					<div class="response" id="mce-success-response" style="display:none">
+						<div class="icon"></div>
+					</div>
+					<div style="position: absolute; left: -5000px" aria-hidden="true">
+						<input type="text" name="b_d4d629f82da1338a5bc8c2ff1_4922fbdc48" tabindex="-1" value=""/>
+					</div>
+				</div>
+				<script>
+					var script = document.createElement('script');
+					script.type = 'text/javascript';
+					script.src = '//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js';
+					document.getElementsByTagName('head')[0].appendChild(script);
+				</script>
+			</form>
+		</div>
+		<p class="copyright">&copy;2017 Eighth Mind, Inc. All rights reserved. Use of this site constitutes acceptance of our website Terms of Use and Privacy Policy. The material on this site may not be reproduced, distributed, transmitted, cached or otherwise used, except with prior written permission of Eighth Mind, Inc.</p>
+		<p class="privacy">
+			<a href='/privacy'>Terms of Use &amp; Privacy Policy</a>
+		</p>
+
+	</div>
+</footer>
+<!--/#footer-->
+<script async defer src="//assets.pinterest.com/js/pinit.js"></script>

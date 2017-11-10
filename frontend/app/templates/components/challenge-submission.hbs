@@ -1,0 +1,59 @@
+<div class="challenge-submission-images">
+	
+	{{!-- {{#if (eq gallery.assets.length 1) }} --}}
+	{{!-- {{log articleID submission session}} --}}
+
+		{{#each submission.assets as |asset|}}
+			<div class="challenge-submission-img" data-asset-id={{asset.id}}>
+				{{#if session.success}}
+					{{#if (eq submission.userID session.userID)}}
+						<div class="challenge-submission-edit">
+							<button class='delete' {{action 'deleteAsset' articleID submission.id asset.id store}}>Delete</button>
+						</div>
+					{{/if}}
+				{{/if}}
+				{{light-box href=asset.image data-lightbox=submission.id data-title=asset.caption}}
+			</div>
+		{{/each}}
+
+	
+</div>
+
+<div class="challenge-submission-data">
+	<div class="challenge-submission-title">
+		<h2>{{short-desc submission.title len='28'}}</h2>
+	</div>
+	<div class="challenge-submission-username">
+		<p>{{submission.name}}</p>
+	</div>
+	<div class="challenge-submission-upvote">
+		{{#if (eq article.upVoting)}}
+			{{#if session.success}}
+				<span class="upvote-counter" data-submission-id="{{gallery.id}}" {{action "handleUpvote" gallery.id model.article.id}}>
+					{{gallery.upVotes}}
+					<i class="icon-heart">
+						<svg viewBox="0 0 96.6 85.1">
+							<path class="icon-sprite" d="M96.6,26.5C96.6,11.9,84.7,0,70.1,0c-8.8,0-16.7,4.3-21.5,11l0,0l0,0C43.8,4.3,36,0,27.1,0
+							C12.5,0,0.6,11.9,0.6,26.5c0,7.9,3.5,15,8.9,19.8l39.1,38.8l39.4-39l0,0C93.3,41.2,96.6,34.3,96.6,26.5z"/>
+						</svg>
+					</i>
+				</span>
+			{{else}}
+				{{#link-to 'login'}}
+					{{!-- Logged Out --}}
+					<span class="upvote-counter">
+						{{gallery.upVotes}}
+						<i class="icon-heart">
+							<svg viewBox="0 0 96.6 85.1">
+								<path class="icon-sprite" d="M96.6,26.5C96.6,11.9,84.7,0,70.1,0c-8.8,0-16.7,4.3-21.5,11l0,0l0,0C43.8,4.3,36,0,27.1,0
+								C12.5,0,0.6,11.9,0.6,26.5c0,7.9,3.5,15,8.9,19.8l39.1,38.8l39.4-39l0,0C93.3,41.2,96.6,34.3,96.6,26.5z"/>
+							</svg>
+						</i>
+					</span>
+				{{/link-to}}
+			{{/if}}
+		{{/if}}
+	</div>
+</div>
+
+{{yield}}

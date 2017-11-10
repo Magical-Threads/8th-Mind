@@ -1,0 +1,1 @@
+/Users/marioluevanos/Web Development/_8thmind/frontend/node_modules/ember-cli/lib/broccoli/testem.js

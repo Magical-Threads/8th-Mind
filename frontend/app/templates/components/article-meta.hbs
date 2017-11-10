@@ -1,0 +1,28 @@
+{{#if model.article.allowSubmission}}
+
+	<div class='article-meta-text article-challenge-date'>
+		<span class="article-icon"><svg viewBox="0 0 11.05 16.8"><polyline points="1.22 1.22 8.58 8.58 1.22 15.54"/></svg></span>
+		<div class='article-challenge-label'><span>Starts</span> {{moment-format model.article.dateStart 'MMMM Do YYYY'}}</div>
+		<div class='article-challenge-label'><span>Ends</span> {{moment-format model.article.dateEndVoting 'MMMM Do YYYY'}}</div>
+	</div>
+
+{{else}}
+
+	<div class='article-meta-text article-author'>
+		<span class="article-icon"><svg viewBox="0 0 11.05 16.8"><polyline points="1.22 1.22 8.58 8.58 1.22 15.54"/></svg></span>
+		<span>By {{change-author-name model.article.articleID 22 23}}</span>
+	</div>
+
+{{/if}}
+
+<div class="article-social-media">
+
+	{{#fb-share-button url=model.article.url}}Share{{/fb-share-button}}
+	{{#twitter-share-button
+		url=model.article.url
+		hastag='#8thMind'
+		title=model.article.title
+		text=model.article.body}}Tweet
+	{{/twitter-share-button}}
+
+</div>

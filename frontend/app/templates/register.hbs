@@ -1,0 +1,28 @@
+<section id='page-register-login'>
+	<div class='form'>
+		<h2>Register for an account</h2>
+		<form>
+			<div class="form-input">
+				{{input value=userFirstName  type='text' placeholder='First Name'}}
+				{{display-errors errors=errors.userFirstName showErrors=showErrors class='form-error'}}
+			</div>
+			<div class="form-input">
+				{{input value=userLastName  type='text' placeholder='Last Name'}}
+				{{display-errors errors=errors.userLastName showErrors=showErrors class='form-error'}}
+			</div>
+			<div class="form-input">
+				{{input value=userEmail  type='email' placeholder='Email'}}
+				{{display-errors errors=errors.userEmail showErrors=showErrors class='form-error'}}
+			</div>
+			<div class="form-input">
+				{{input value=password type='password' placeholder='Password' }}
+				{{display-errors errors=errors.password showErrors=showErrors class='form-error'}}
+			</div>
+			<div class="checkbox">
+				{{input type='checkbox' checked='true' class='checkbox-input' name='subscribeCheck' checked=subscribeCheck}} Yes, I am interested in receiving emails about creative challenges, articles, and what’s new at 8th Mind.
+			</div>
+			<button {{action 'register'}}><span class="button button-teal">Register</span></button>
+		</form>
+		<p>Already a Member? {{#link-to 'login' class='login'}}<span>Login</span>{{/link-to}}</p>
+	</div>
+</section>

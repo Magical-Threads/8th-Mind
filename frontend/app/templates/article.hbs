@@ -1,0 +1,56 @@
+{{outlet}}
+
+<section id='page-article' data-page-type='{{is-a-challenge model.article.allowSubmission}}'>
+
+	<div class='page-article-hero post'>
+
+		<span class='post-type'>{{model.article.submissionType}} Challenge</span>
+		<span class='post-tag {{category-tag-class model.article.tag}}'>
+			<a href='{{category-href model.article.tag}}'>
+				{{category-tag model.article.tag}}
+			</a>
+		</span>
+
+		<figure style='background-image: url({{serverURL}}storage/articles/{{model.article.image}})'>
+			<img src='{{serverURL}}storage/articles/{{model.article.image}}' class="desktop-hide" alt="">
+		</figure>
+	</div>
+
+	<div class='page-article-content'>
+
+		<div class='article-heading'>
+			<h1 class='article-title'>{{model.article.title}}</h1>
+			<svg viewBox="0 0 51 35.7" class='icon'>
+				<rect class="st0" width="51" height="8.7"/>
+				<rect y="27" class="st0" width="51" height="8.7"/>
+			</svg>
+		</div>
+
+		<div class='article-body'>
+
+			<article>
+				{{article-meta model=model}}
+				{{article-author-content article=model.article}}
+				{{article-challenges model=model}}
+				{{article-comments model=model}}
+			</article>
+			
+			{{article-aside model=model}}
+
+		</div><!-- article-body -->
+
+	</div><!-- parge-article-content -->
+
+	<div class='join'>
+		<div class='join-text'>
+			<p><strong>Join our community</strong> of inspiring stories, creative minds and far off worlds</p>
+		</div>
+		<div class='join-form'>
+			{{#link-to 'register' class='register'}}<span class='button button-orange'>Register</span>{{/link-to}}
+		</div>
+	</div>
+
+</section>
+
+
+

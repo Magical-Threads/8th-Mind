@@ -1,0 +1,1 @@
+/Users/marioluevanos/Web Development/_8thmind/frontend/tmp/funnel-input_base_path-plEhqHOY.tmp/authorizers/oauth2-bearer.js

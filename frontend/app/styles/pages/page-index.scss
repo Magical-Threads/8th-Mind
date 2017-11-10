@@ -1,0 +1,546 @@
+#page-index {
+	position: relative;
+	padding: 5px 0;
+	background: white;
+	@include bp(1) {
+		padding: 0;
+	}
+
+	/********************
+	Clear Fix
+	********************/
+	.post-row {
+		// Clear fix
+		&:after {
+			content: '';
+			clear: both;
+			display: table;
+		}
+		@include bp(0) {
+			display: block;
+		}
+	}
+
+	/********************
+	Post Hero
+	********************/
+	.post.post-hero {
+		width: 75%;
+		.post-thumb {
+			> a {
+				position: relative;
+				// Gradient for hero
+				&:before {
+					content: '';
+					position: absolute;
+					top: 0; right: 0; bottom: 0; left: 0;
+					background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 100%);
+					z-index: 1;
+				}
+			}
+			figure {
+				opacity: 0.9;
+			}
+		}
+		.post-type {
+			font-size: 1.15vw;
+			position: absolute;
+			transform: rotate(-90deg);
+			transform-origin: 0% 0%;
+			text-transform: uppercase;
+			bottom: vw(30);
+			left: vw(30);
+			color: white;
+			z-index: 1;
+			@include bp(1) {
+				display: none;
+			}
+			a {
+				color: inherit;
+				text-decoration: none;
+			}
+		}
+		&:hover .post-thumb figure {
+			transform: scale(1.025)!important;
+		}
+		.post-author {
+			position: absolute;
+			top: vw(30);
+			left: vw(100);
+			@include bp(1) {
+				display: none;
+			}
+		}
+		.post-text {
+			width: 60%;
+			bottom: vw(40);
+			left: vw(80);
+		}
+		.post-text [mobile] {
+			display: none;
+		}
+		.post-title {
+			color: $color-yellow;
+			@include bp(1) {
+				color: black;
+			}
+		}
+		@include bp(1) {
+			.post-text [mobile] {
+				display: block;
+				position: relative;
+				top: initial;
+				left: initial;
+			}
+		}
+	}
+
+	/********************
+	Post Large
+	********************/
+	.post.post-large {
+		width: 50%;
+		figure {
+			opacity: 0.9;
+			mix-blend-mode: luminosity;
+		}
+		.post-text {
+			top: vw(30);
+			right: vw(30);
+			text-align: right;
+			width: 50%;
+			@include bp(1) {
+				position: relative;
+				width: 100%;
+				top: initial;
+				right: initial;
+				padding: 10px 20px;
+				text-align: left;
+			}
+		}
+		.post-title {
+			margin: 0 0 vw(15) 0;
+			color: $color-orange;
+			@include bp(1) {
+				color: black;
+			}
+		}
+	}
+
+	/********************
+	Post Small
+	********************/
+	.post.post-small {
+		width: calc(25% - 10px);
+		.post-thumb {
+			height: 60%;
+			top: initial;
+		}
+		.post-text {
+			padding: 10px 20px;
+			height: 40%;
+			top: 0; right: 0; left: 0;
+			@include bp(1) {
+				position: relative;
+			}
+		}
+	}
+	// Move text below the image
+	.post-row:nth-of-type(2) .post:nth-of-type(3) {
+		.post-thumb {
+			bottom: initial;
+			top: 0;
+		}
+		.post-text {
+			bottom: 0;
+			top: initial;
+			padding-top: vw(20);
+		}
+	}
+
+	/* Post XLarge */
+	.post.post-xlarge {
+		width: calc(60%);
+		.post-thumb {
+			figure {
+				opacity: 0.9;
+				mix-blend-mode: luminosity;
+			}
+		}
+		.post-text {
+			position: absolute;
+			top: vw(30);
+			left: vw(30);
+			bottom: initial;
+			text-align: left;
+			width: 50%;
+			z-index: 1;
+			@include bp(1) {
+				position: relative;
+			}
+		}
+		.post-tag {
+			position: absolute;
+			left: vw(30);
+			bottom: vw(30);
+			z-index: 3;
+		}
+		.post-title {
+			color: $color-lime;
+			@include bp(1) {
+				color: black;
+			}
+		}
+	}
+
+	/* Post XLarge */
+	.post.post-narrow {
+		width: calc(20% - 10px);
+		.post-thumb {
+			position: absolute;
+			height: 60%;
+			@include bp(1) {
+				position: relative;
+			}
+		}
+		.post-text {
+			position: absolute;
+			height: 40%;
+			top: 60%;
+			left: 0; right: 0;
+			// padding: 15px vw(30) 0;
+			padding: vw(20) 20px;
+			z-index: 1;
+			@include bp(1) {
+
+			}
+		}
+	}
+
+	/* Global Post Style */
+	/********************
+	Post Shared Style
+	********************/
+
+	.post.post-hero,
+	.post.post-large,
+	.post.post-xlarge {
+		.post-title {
+			font-size: 3vw;
+		}
+		.post-desc {
+			display: none;
+			@include bp(1) {
+				display: block;
+			}
+		}
+		.post-author {
+			color: white;
+			@include bp(1) {
+				color: $color-gray-light;
+			}
+		}
+	}
+
+	.post.post-hero,
+	.post.post-large,
+	.post.post-small,
+	.post.post-xlarge,
+	.post.post-narrow {
+		margin-right: 10px;
+		@include bp(1) {
+			width: 100%;
+			margin: 0;
+		}
+		.post-text {
+			position: absolute;
+			z-index: 1;
+		}
+	}
+
+	/********************
+	Tab Construction
+	********************/
+	// Last post of the row, zero margin
+	.post-row .post:last-of-type {
+		margin: 0;
+	}
+	// Add height to the first two rows of the homepage
+	.post-row:nth-of-type(1) .post,
+	.post-row:nth-of-type(2) .post {
+		padding-bottom: 30%;
+		@include bp(1) {
+			padding-bottom: 0;
+		}
+	}
+	// .post-row:nth-of-type(1) .post,
+	// .post-row:nth-of-type(2) .post,
+	// .post-row:nth-of-type(3) .post {
+	// 	padding-bottom: 30%;
+	// 	@include bp(1) {
+	// 		padding-bottom: 0;
+	// 	}
+	// }
+
+	/********************
+	Mix blend mode for colored thumbnails
+	********************/
+	.post-row:nth-of-type(1) .post-small,
+	.post-row:nth-of-type(2) .post-small:nth-of-type(1) {
+		figure {
+			filter: saturate(0);
+			mix-blend-mode: multiply;
+		}
+	}
+	.post-row:nth-of-type(1) .post-small {
+		.post-thumb {
+			background: $color-yellow;
+		}
+	}
+	.post-row:nth-of-type(2) .post-small:nth-of-type(1) {
+		.post-thumb {
+			background: $color-teal;
+		}
+	}
+
+	/********************
+	SVG icons for Post Thumbnails
+	********************/
+	.post-row .post .post-text:before {
+		content: '';
+		position: absolute;
+		background-repeat: no-repeat;
+		background-position: 50% 50%;
+		background-size: contain;
+		z-index: 1;
+		@include bp(1) {
+			content: initial;
+			display: none;
+		}
+	}
+
+	// First row
+	.post-row:nth-of-type(1) .post:last-of-type {
+		.post-text {
+			&:before {
+				width: vw(38);
+				height: vw(45);
+				bottom: 0; left: 0;
+				background-image: url(../assets/images/icon-arrow-red.svg);
+				transform: translate(vw(20), vw(30));
+			}
+		}
+	}
+	// Second row
+	.post-row:nth-of-type(2) .post:first-of-type {
+		.post-text {
+			&:before {
+				width: vw(38);
+				height: vw(44);
+				bottom: 0; right: 0;
+				background-image: url(../assets/images/icon-cross-yellow.svg);
+				transform: translate(vw(-20), vw(20));
+			}
+		}
+	}
+	.post-row:nth-of-type(2) .post:last-of-type {
+		.post-text {
+			&:before {
+				width: vw(35);
+				height: vw(45);
+				top: 0; left: 0;
+				background-image: url(../assets/images/icon-arrow-teal.svg);
+				transform: translate(vw(20), vw(-34));
+			}
+		}
+	}
+	// Third row
+	// .post-row:nth-of-type(3) .post:first-of-type {
+	// 	.post-thumb {
+	// 		&:before {
+	// 			content: '';
+	// 			width: vw(45);
+	// 			height: vw(32);
+	// 			bottom: 25%; left: 0;
+	// 			position: absolute;
+	// 			background: url(../assets/images/icon-equal-orange.svg) no-repeat 50% 50%/contain;
+	// 			z-index: 1;
+	// 		}
+	// 	}
+	// }
+	// .post-row:nth-of-type(3) .post:nth-of-type(2) {
+	// 	.post-text {
+	// 		&:before {
+	// 			width: vw(38);
+	// 			height: vw(45);
+	// 			top: 0; left: 0;
+	// 			background-image: url(../assets/images/icon-arrow-lime-teal.svg);
+	// 			transform: translate(vw(20), vw(-34));
+	// 		}
+	// 	}
+	// }
+	// .post-row:nth-of-type(3) .post:last-of-type {
+	// 	.post-text {
+	// 		&:before {
+	// 			width: vw(38);
+	// 			height: vw(44);
+	// 			top: 0; left: 0;
+	// 			background-image: url(../assets/images/icon-cross-red.svg);
+	// 			transform: translate(vw(20), vw(-30));
+	// 		}
+	// 	}
+	// }
+	// Fourth row
+	.post-row.single-column {
+		// Three Row
+		.post-three-row {
+			.post {
+				.post-thumb {
+					&:before {
+						content: '';
+						width: 45px;
+						height: 45px;
+						top: 0; left: 0;
+						position: absolute;
+						background-color: white;
+						background-repeat: no-repeat;
+						background-position: 50% 50%;
+						background-size: contain;
+						z-index: 2;
+						@include bp(1) {
+							content: initial;
+							display: none;
+						}
+					}
+				}
+				&:first-of-type .post-thumb:before {
+					background-image: url(../assets/images/icon-fold-yellow.svg);
+				}
+				&:nth-of-type(2) .post-thumb {
+					&:before {
+						background-image: url(../assets/images/icon-fold-red.svg);
+					}
+					.post-tag {
+						right: vw(30); bottom: vw(30); left: initial;
+					}
+				}
+				&:last-of-type .post-thumb {
+					&:before {
+						top: initial; right: 0; bottom: 0; left: initial;
+						background-image: url(../assets/images/icon-fold-orange.svg);
+					}
+					&:after {
+						content: '';
+						width: vw(45);
+						height: vw(32);
+						bottom: 50%; left: 0;
+						position: absolute;
+						background: url(../assets/images/icon-equal-orange.svg) no-repeat 50% 50%/contain;
+						z-index: 1;
+					}
+				}
+			}
+		}
+	}
+
+	/********************
+	Post Tag specified for thumbnails
+	********************/
+	.post {
+		.post-tag {
+			position: absolute;
+			z-index: 2;
+		}
+		&.post-hero .post-tag {
+			top: vw(30);
+			left: vw(30);
+		}
+		&.post-large .post-tag {
+			right: vw(30);
+			bottom: vw(30);
+		}
+	}
+	// First row - Small thumbnails
+	.post-row:nth-of-type(1) .post-small {
+		.post-tag {
+			right: vw(30);
+			top: 50%;
+			transform: translate(0, -50%);
+		}
+		.post-type {
+			display: none;
+		}
+		.post-author[desktop] {
+			display: none;
+		}
+	}
+	// Second row
+	.post-row:nth-of-type(2) {
+		.post-small:nth-of-type(1) .post-tag {
+			left: vw(30);
+			bottom: vw(30);
+		}
+		.post:nth-of-type(3) .post-tag {
+			right: vw(30);
+			top: 50%;
+			transform: translate(0, -50%);
+		}
+	}
+	// .post-row:nth-of-type(3) .post:nth-of-type(2) {
+	// 	.post-text {
+	// 		background: $color-orange;
+	// 		// @include bp(2) {
+	// 		// 	background: white;
+	// 		// }
+	// 	}
+	// 	.post-tag {
+	// 		position: absolute;
+	// 		left: vw(30);
+	// 		top: 50%;
+	// 		transform: translate(0, -50%);
+	// 		z-index: 3;
+	// 	}
+	// }
+
+	// Third row
+	// .post-row:nth-of-type(3) .post:nth-of-type(3) {
+	// 	.post-text {
+	// 		background: $color-gray;
+	// 		// @include bp(2) {
+	// 		// 	background: white;
+	// 		// }
+	// 	}
+	// 	.post-tag {
+	// 		position: absolute;
+	// 		right: vw(30);
+	// 		top: vw(30);
+	// 		z-index: 3;
+	// 	}
+	// }
+
+	// .post-row:nth-of-type(3) .post.post-narrow {
+	// 	.post-title,
+	// 	.post-desc,
+	// 	.post-author {
+	// 		color: white;
+	// 	}
+	// 	.post-desc {
+	// 		display: none;
+	// 		@include bp(1) {
+	// 			display: block;
+	// 		}
+	// 	}
+	// 	@include bp(1) {
+	// 		.post-title { color: black; }
+	// 		.post-desc { color: $color-gray; }
+	// 		.post-author { color: $color-gray-light; }
+	// 	}
+	// }
+
+	// Add specific class the the 3rd row incase there is less than 3 post
+	.post-row.post-row-length-1 .post.post-xlarge { width: 100%; }
+	.post-row.post-row-length-2 .post.post-xlarge { width: calc(50% - 10px); }
+	.post-row.post-row-length-2 .post.post-narrow { width: 50%; }
+
+
+}

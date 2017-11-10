@@ -1,0 +1,7 @@
+{{yield}}
+<h2 class='post-aside-title' mobile>More from 8th Mind</h2>
+{{#each model.related as |related index|}}
+	{{#if (lt index 3)}}
+		{{article-post article=related}}
+	{{/if}}
+{{/each}}

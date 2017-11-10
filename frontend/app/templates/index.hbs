@@ -1,0 +1,74 @@
+
+<section id='page-index'>
+	<div class='post-row'>
+		{{#each model as |article index|}}
+			{{#if (eq index 0)}}
+				{{article-post article=article class='post-hero'}}
+			{{/if}}
+			{{#if (eq index 1)}}
+				{{article-post article=article class='post-small'}}
+			{{/if}}
+		{{/each}}
+	</div>
+
+	<div class='post-row'>
+		{{#each model as |article index|}}
+			{{#if (eq index 2)}}
+				{{article-post article=article class='post-small'}}
+			{{/if}}
+			{{#if (eq index 3)}}
+				{{article-post article=article class='post-large'}}
+			{{/if}}
+			{{#if (eq index 4)}}
+				{{article-post article=article class='post-small'}}
+			{{/if}}
+		{{/each}}
+	</div>
+
+	<div class='post-row single-column'>
+		<div class='post-three-row'>
+			{{#each model as |article index|}}
+				{{#if (eq index 5)}}
+					{{article-post article=article}}
+				{{/if}}
+				{{#if (eq index 6)}}
+					{{article-post article=article}}
+				{{/if}}
+				{{#if (eq index 7)}}
+					{{article-post article=article}}
+				{{/if}}
+			{{/each}}
+			<hr class="yellow">
+		</div>
+
+		<div class='page-articles-container'>
+			<div class='page-articles-wrap'>
+				<div class='post-one-row'>
+					{{#each model as |article index|}}
+						{{#if (eq index 8)}}
+							<div class='page-articles-row'>
+								{{article-post article=article}}
+							</div>
+						{{/if}}
+						{{#if (eq index 9)}}
+							<div class='page-articles-row'>
+								{{article-post article=article}}
+							</div>
+						{{/if}}
+						{{#if (eq index 10)}}
+							<div class='page-articles-row'>
+								{{article-post article=article}}
+							</div>
+						{{/if}}
+						{{#if (eq index 11)}}
+							<div class='page-articles-row'>
+								{{article-post article=article}}
+							</div>
+						{{/if}}
+					{{/each}}
+				</div>
+			</div>
+		</div>
+	</div>
+
+</section>

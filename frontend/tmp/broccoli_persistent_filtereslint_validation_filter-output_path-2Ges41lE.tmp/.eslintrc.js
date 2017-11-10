@@ -1,0 +1,1 @@
+/Users/marioluevanos/Web Development/_8thmind/frontend/tmp/broccoli_persistent_filtereslint_validation_filter-input_base_path-qp6fBGDS.tmp/.eslintrc.js

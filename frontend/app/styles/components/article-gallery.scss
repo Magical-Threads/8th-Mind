@@ -1,0 +1,34 @@
+#article-gallery {
+	position: relative;
+	height: 100%;
+	top: 0; right: 0; bottom: 0; left: 0;
+	z-index: 1337;
+
+	.article-wrap {
+		background: white;
+		height: 100%;
+		position: relative;
+		background: white;
+	}
+	.challenge-submissions {
+		padding: 2%;
+	}
+	.challenge-submission {
+		position: relative;
+		width: 19%;
+		margin: 0.5%;
+	}
+	.challenge-submit {
+		display: none;
+	}
+}
+
+#article-gallery + #page-article {
+	position: absolute;
+	background: none;
+	top: 0; right: 0; bottom: 0; left: 0;
+	.page-article-content,
+	.join {
+		display: none;
+	}
+}

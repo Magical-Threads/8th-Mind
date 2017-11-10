@@ -1,0 +1,16 @@
+/* This file imports all CSS and generates the index.css file */
+@import 'mixins';
+@import 'vars';
+@import 'reset';
+@import 'fonts';
+
+@import 'components/article-post';
+@import 'components/article-gallery';
+@import 'components/challenge-submission';
+
+@import 'pages/global';
+@import 'pages/page-index';
+@import 'pages/page-article';
+@import 'pages/page-gallery';
+@import 'pages/page-register';
+

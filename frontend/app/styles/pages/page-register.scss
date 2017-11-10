@@ -1,0 +1,115 @@
+#page-register-login {
+    padding: vw(90) 0;
+    position: relative;
+    background: white;
+
+    .form {
+    	position: relative;
+		padding: 0 vw(180);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		font-size: 1.5vw;
+		p {
+			font-size: inherit;
+			margin: 0;
+		}
+		h2 {
+			text-align: left;
+			font-size: 2.25vw;
+			margin: 0 0 vw(30);
+		}
+		form {
+			margin: 0;
+			width: 60%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-direction: column;
+			color: $color-blue;
+			.button {
+				width: 100%;
+			}
+		}
+		input[type='text'],
+		input[type='email'],
+		input[type='password'] {
+			background: $color-offwhite;
+			border: none;
+			display: block;
+			width: 100%;
+			color: black;
+			font-family: $font-bold;
+			margin-bottom: vw(10);
+			padding: vw(10) vw(10);
+			-webkit-text-fill-color: inherit;
+			&:last-of-type {
+				margin: 0;
+			}
+		}
+
+		.form-input {
+			position: relative;
+			width: 100%;
+			margin-bottom: vw(10);
+			.form-error {
+				position: absolute;
+				top: 50%;
+				transform: translate(0, -50%);
+				right: 0;
+				p {
+					position: absolute;
+					top: 0; right: vw(10);
+					height: 100%;
+					white-space: nowrap;
+					background: $color-offwhite;
+					color: $color-orange!important;
+					text-transform: uppercase;
+					font: normal 1vw $font-bold;
+					display: flex;
+					padding: vw(10) 0;
+					align-items: center;
+					transform: translate(0,-50%);
+				}
+			}
+		}
+
+		.checkbox {
+			padding: vw(10) 0;
+			font-size: 1.5vw;
+			color: black;
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			input {
+				margin-right: vw(10);
+			}
+			a {
+				color: black;
+			}
+		}
+    }
+    .login {
+    	text-transform: uppercase;
+    	font-family: $font-bold;
+    	text-decoration: none;
+    }
+	button {
+		padding: 0;
+		margin: vw(15) 0;
+		background: none;
+		border: none;
+	}
+
+	/* Forget Password page */
+	&.forget-password {
+		p {
+			margin-bottom: vw(30);
+		}
+	}
+}
