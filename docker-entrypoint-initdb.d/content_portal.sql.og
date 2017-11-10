@@ -1,0 +1,232 @@
+-- MySQL dump 10.13  Distrib 5.7.19, for Linux (x86_64)
+--
+-- Host: localhost    Database: content_portal
+-- ------------------------------------------------------
+-- Server version	5.7.19-0ubuntu0.16.04.1
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `article_submissions`
+--
+
+DROP TABLE IF EXISTS `article_submissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `article_submissions` (
+  `articleSubmissionID` int(11) NOT NULL AUTO_INCREMENT,
+  `articleID` int(11) NOT NULL,
+  `userID` int(11) NOT NULL,
+  `submissionTitle` varchar(255) NOT NULL,
+  `submissionContent` text NOT NULL,
+  `upVotes` int(11) DEFAULT NULL,
+  `downVotes` int(11) DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  PRIMARY KEY (`articleSubmissionID`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `article_submissions`
+--
+
+LOCK TABLES `article_submissions` WRITE;
+/*!40000 ALTER TABLE `article_submissions` DISABLE KEYS */;
+INSERT INTO `article_submissions` VALUES (1,11,13,'test\r\n','1504071175soap-bubble-1959327_960_720.jpg',1,0,'2017-08-29 22:32:55'),(2,11,14,'Test1','1504071175soap-bubble-1959327_960_720.jpg',0,0,'2017-08-29 22:32:55'),(3,11,15,'Test2','1504071175soap-bubble-1959327_960_720.jpg',0,0,'2017-08-29 22:32:55'),(4,11,16,'Test3','1504071175soap-bubble-1959327_960_720.jpg',0,0,'2017-08-29 22:32:55'),(5,11,17,'Test4','1504071175soap-bubble-1959327_960_720.jpg',0,0,'2017-08-29 22:32:55'),(6,11,18,'Test18','1504071175soap-bubble-1959327_960_720.jpg',0,0,'2017-08-29 22:32:55'),(7,11,19,'Test19','1504071175soap-bubble-1959327_960_720.jpg',0,0,'2017-08-29 22:32:55'),(8,11,20,'Test20','1504071175soap-bubble-1959327_960_720.jpg',0,0,'2017-08-29 22:32:55'),(9,11,21,'Test21','1504071175soap-bubble-1959327_960_720.jpg',0,0,'2017-08-29 22:32:55'),(10,11,22,'Test22','1504071175soap-bubble-1959327_960_720.jpg',0,0,'2017-08-29 22:32:55'),(12,10,13,'Robot System','https://www.youtube.com/embed/O7FfIG5aSyc',0,0,'2017-08-30 00:15:06'),(13,8,13,'test','1504078762testupload.txt',0,0,'2017-08-30 00:39:22'),(14,11,37,'ttest','1504197325Koala.jpg',NULL,NULL,'2017-08-31 16:35:25');
+/*!40000 ALTER TABLE `article_submissions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `articles`
+--
+
+DROP TABLE IF EXISTS `articles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `articles` (
+  `articleID` int(11) NOT NULL AUTO_INCREMENT,
+  `articleTitle` varchar(255) NOT NULL,
+  `articleDescription` text NOT NULL,
+  `articleImage` varchar(255) NOT NULL,
+  `articleStartDate` date NOT NULL,
+  `articleExpireDate` date NOT NULL,
+  `articleAllowSubmission` enum('Yes','No') NOT NULL DEFAULT 'Yes',
+  `articleSubmissionType` enum('Photo','Video','File') NOT NULL DEFAULT 'Photo',
+  `articleAllowGallery` enum('Yes','No') NOT NULL DEFAULT 'Yes',
+  `articleEndVotingDate` date NOT NULL,
+  `articleAllowUpvoting` enum('Yes','No') NOT NULL DEFAULT 'Yes',
+  `articleAllowComment` enum('Yes','No') NOT NULL DEFAULT 'Yes',
+  `articleTags` text NOT NULL,
+  `articleStatus` enum('Active','Disable') NOT NULL DEFAULT 'Active',
+  `userID` int(11) NOT NULL,
+  `articleRules` text NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`articleID`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `articles`
+--
+
+LOCK TABLES `articles` WRITE;
+/*!40000 ALTER TABLE `articles` DISABLE KEYS */;
+INSERT INTO `articles` VALUES (1,'PHASELUS NON  MI SAPIEN','<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin nulla mauris, bibendum sed urna vel, pretium tincidunt lectus. Etiam imperdiet tristique libero, quis hendrerit ex fringilla varius. Vestibulum venenatis diam tempus pharetra scelerisque. Integer a vehicula arcu. Donec pellentesque felis quis iaculis mollis. Pellentesque tempus rhoncus nisl. Integer pulvinar leo vitae dui molestie pharetra. Donec eleifend accumsan blandit. Nulla id ultricies nisi, ac congue nunc. Fusce leo metus, congue ac facilisis id, dictum nec ligula. Nunc ut risus eget lacus porta luctus at vestibulum urna. Morbi vitae eros cursus, vestibulum magna vitae, auctor est. Praesent suscipit felis sed odio efficitur, at euismod sapien dignissim.</p>\r\n','4403ed0a2c9eae870beddf8f8c8a9751.jpg','2017-08-26','2017-08-31','Yes','Photo','Yes','2017-08-31','Yes','Yes','songs,arts,entertainment','Active',11,'','2017-08-26 14:28:56','2017-08-26 15:32:03'),(2,'SALE ON GALLONS OF GRAVITY','<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&#39;s standard dummy text ever since the 1500s,</p>\r\n','3c44c1c522c26e06f0ccef5f4c982a3b.png','2017-08-26','2017-08-31','Yes','Photo','Yes','2017-08-31','Yes','Yes','articles','Active',11,'','2017-08-26 15:48:04','2017-08-26 15:48:04'),(3,'SALE ON GALLONS OF GRAVITY','<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&#39;s standard dummy text ever since the 1500s,</p>\r\n','f95fa74445cfd7475716c3f6d21aa3eb.png','2017-08-26','2017-08-31','Yes','Photo','Yes','2017-08-31','Yes','Yes','article','Active',11,'','2017-08-26 15:49:33','2017-08-26 15:49:33'),(4,'COMMING SOON DONEC CURSUS TEMPUS ET','<p>COMMING SOON DONEC CURSUS TEMPUS ET</p>\r\n','eb81aa4b70a2c5cd8b475cd33ff42275.png','2017-08-26','2017-08-31','Yes','Photo','Yes','2017-08-31','Yes','Yes','articles','Active',11,'','2017-08-26 15:51:16','2017-08-26 15:51:16'),(5,'CURSUS TEMPUS DONEC','<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&#39;s standard dummy text ever since the 1500s,</p>\r\n','24642bf865348fba0b92327a7c9e559c.JPG','2017-08-26','2017-08-31','Yes','Photo','Yes','2017-08-31','Yes','Yes','articles','Active',11,'','2017-08-26 15:52:18','2017-08-26 15:52:18'),(6,'CURSUS TEMPUS DONEC','<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&#39;s standard dummy text ever since the 1500s,</p>\r\n','05a7fbed916d2fbfd6825f5c75cd6d49.JPG','2017-08-26','2017-08-31','Yes','Photo','Yes','2017-08-31','Yes','Yes','articles','Active',11,'','2017-08-26 15:52:18','2017-08-26 15:52:18'),(7,'TEMPUS','<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>\r\n','dd69ff67a128afd7e41b048063ef340c.png','2017-08-26','2017-08-31','Yes','Photo','Yes','2017-08-31','Yes','Yes','articles','Active',11,'','2017-08-26 15:53:29','2017-08-26 15:53:29'),(8,'TEMPUS DONEC','<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>\r\n','d950e1c29ae2993331acb5cbb2c46915.jpg','2017-08-26','2017-08-30','Yes','File','Yes','2017-08-30','Yes','Yes','robot','Active',11,'','2017-08-26 15:54:13','2017-08-30 08:57:39'),(9,'JUSTO MAURIS','<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>\r\n','1b8de41e579cecdc9c75b45fc5bedbef.png','2017-08-26','2017-08-31','Yes','Photo','Yes','2017-08-30','Yes','Yes','scene','Active',11,'','2017-08-26 15:54:58','2017-08-26 15:54:58'),(10,'JUSTO MAURIS','<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>\r\n','8701c497e61fd5c26d8d88dbb1e09db7.jpg','2017-08-26','2017-08-31','Yes','Video','Yes','2017-08-30','Yes','Yes','mountain','Active',11,'','2017-08-26 15:55:36','2017-08-30 08:57:18'),(11,'MET CURUS','<p>asdkfh;asdfj &#39;askdjflaksdj;as dfas dlfjsdlfjsdjflskd ljflksjf;ls dflkflj f s j</p>\r\n\r\n<p>&nbsp;</p>\r\n','c2e36b8ff5a4aa0a8eb6793810236568.jpg','2017-08-16','2017-08-31','Yes','Photo','Yes','2017-08-31','Yes','Yes','superman','Active',11,'','2017-08-28 07:45:53','2017-09-01 19:26:18'),(12,'Test','<p>qwewqe</p>\r\n','bd71edf1497d2d232ac0abc5ffab1ed0.jpg','2017-08-21','2017-08-31','Yes','Photo','Yes','2017-08-31','Yes','Yes','atrticles','Active',11,'','2017-08-30 18:06:04','2017-09-01 19:26:17'),(13,'Fan Art on Ninjago','<p>An Introduction to the 8th Mind<br />\r\nWelcome to the 8th Mind!&nbsp;</p>\r\n\r\n<p><br />\r\nThe 8th Mind is an online community that helps creators of all ages find their path. It is a home where we can build new worlds together.</p>\r\n\r\n<p><br />\r\nThe 8th Mind is the place where the creators of the future will craft the next great imaginary universes.&nbsp;</p>\r\n\r\n<p><br />\r\nVisitors will discover new imaginary realms and share their own creations. Everyone will work together on artistic challenges. Great storytellers and industry professionals will guide the aspiring creators in the community.&nbsp;</p>\r\n\r\n<p><br />\r\n[IMAGE: Gary Gygax photo and quote as inspirational poster<br />\r\nhttp://imgur.com/FBT3Psy]</p>\r\n\r\n<p><br />\r\nWe are particularly inspired by the work of the great Gary Gygax, creator of Dungeons &amp; Dragons. Gygax developed a tabletop role-playing game with dice and paper, empowering generations of imaginative kids to go on imaginary adventures together.&nbsp;</p>\r\n\r\n<p><br />\r\nHe once described the game like this:</p>\r\n\r\n<p><br />\r\n&ldquo;The essence of a role-playing game is that it is a group, cooperative experience. There is no winning or losing, but rather the value is in the experience of imagining yourself as a character in whatever genre you&rsquo;re involved in, whether it&rsquo;s a fantasy game, the Wild West, secret agents or whatever else.&rdquo;</p>\r\n\r\n<p><br />\r\nThat same ethos applies to the 8th Mind. Everyone is welcome and everyone will be able to imagine new characters, art, landscapes, or stories.</p>\r\n\r\n<p><br />\r\nEvery single piece of content on our site is an invitation to create something new: whether you draw a picture, describe a character, write a story, or even make a Snapchat video.&nbsp;</p>\r\n\r\n<p><br />\r\nYou don&rsquo;t need any special skills to participate. We will provide all the tools you need to get started: creative prompts, free digital tools, and interviews with great creators.</p>\r\n\r\n<p><br />\r\nLet&rsquo;s get started&hellip;&nbsp;</p>\r\n\r\n<p><br />\r\nThe 8th Mind Sandbox</p>\r\n\r\n<p><br />\r\nNow it&rsquo;s time to visit &ldquo;The 8th Mind Sandbox,&rdquo; a space for community conversation and sharing.&nbsp;</p>\r\n\r\n<p><br />\r\nThe Sandbox discussion is open to writers, artists, and all other kinds of creators. But we also want to hear from readers without any experience as creators! With that in mind, every Sandbox invitation to share on the 8th Mind is directed at three creative &ldquo;levels&rdquo; of readers. &nbsp;</p>\r\n\r\n<p><br />\r\nThe first level is aimed at visitors without any experience creating new worlds.<br />\r\nThe second level will spark aspiring creators trying to learn the craft of writing, art, or other creative mediums.<br />\r\nThe third level will engage readers who have already created new worlds in writing, art, screenwriting, video, or other creative fields.</p>\r\n\r\n<p><br />\r\nHere we go!</p>\r\n\r\n<p><br />\r\nLevel 1 Readers: Post an image from your favorite movie, TV show, videogame, or book in the comments&mdash;share the imaginary world you love the most! &nbsp; &nbsp;</p>\r\n\r\n<p><br />\r\nLevel 2 Readers: Visit the amazing Donjon site where various algorithms will help you generate random characters, magical items, weapons, and even ENTIRE WORLDS.&nbsp;</p>\r\n\r\n<p><br />\r\nIn seconds, the free site can give you enough material for an entire novel.</p>\r\n\r\n<p><br />\r\nTest it out with the &ldquo;Non-Player Character&rdquo; generator. You can quickly create a list of imaginary characters for a role-playing game, but it also works as a way to spark your creative imagination.&nbsp;</p>\r\n\r\n<p><br />\r\n[IMAGE: warrior woman with staff&nbsp;<br />\r\nhttps://www.deviantart.com/art/Staff-Warrior-664515544]<br />\r\n&nbsp;<br />\r\nExperiment with the generator. Keep hitting &ldquo;refresh&rdquo; until you discover a new character that inspires you. Then paste your character description in the comments.&nbsp;</p>\r\n\r\n<p><br />\r\nDone? You are now a creator. It&rsquo;s that simple. Welcome to the world of the 8th Mind!</p>\r\n\r\n<p><br />\r\nWe tried the generator and created &ldquo;Toztlacapo,&rdquo; a female cleric with lots of charisma.&nbsp;</p>\r\n\r\n<p><br />\r\nOur warrior priestess has red hair and dark hazel eyes, her body covered with magical tattoos. Her weapon of choice is the quarterstaff. She was born in a burst of AI activity with a mysterious quest: &ldquo;she seeks to discover why she cannot remember anything from yesterday.&rdquo;</p>\r\n\r\n<p><br />\r\nLevel 3 Readers: Share your favorite character that you created: a drawing, a description, or even a story.</p>\r\n','53258c08c7902d09c8100dc8e891dbf2.jpg','2017-08-01','2017-08-31','Yes','Photo','Yes','2017-08-02','Yes','Yes','','Active',11,'','2017-08-31 21:35:06','2017-09-01 19:26:17');
+/*!40000 ALTER TABLE `articles` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `comments`
+--
+
+DROP TABLE IF EXISTS `comments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `comments` (
+  `commentID` int(11) NOT NULL AUTO_INCREMENT,
+  `userID` int(11) NOT NULL,
+  `articleID` int(11) NOT NULL,
+  `commentText` text NOT NULL,
+  `parentID` int(11) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  PRIMARY KEY (`commentID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `comments`
+--
+
+LOCK TABLES `comments` WRITE;
+/*!40000 ALTER TABLE `comments` DISABLE KEYS */;
+INSERT INTO `comments` VALUES (1,10,1,'Test level 0',0,'2017-08-31 00:00:00'),(2,18,1,'Test level 1',1,'2017-08-31 00:00:00'),(3,15,1,'Test level 0 15',0,'2017-08-31 00:00:00'),(4,19,1,'Test level 2',2,'2017-08-31 00:00:00'),(5,19,2,'Test level 0',0,'2017-08-31 00:00:00');
+/*!40000 ALTER TABLE `comments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `downvotes`
+--
+
+DROP TABLE IF EXISTS `downvotes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `downvotes` (
+  `submissionID` int(11) NOT NULL,
+  `userID` int(11) NOT NULL,
+  `createdAt` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `downvotes`
+--
+
+LOCK TABLES `downvotes` WRITE;
+/*!40000 ALTER TABLE `downvotes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `downvotes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `subscribers`
+--
+
+DROP TABLE IF EXISTS `subscribers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `subscribers` (
+  `subscribeID` int(11) NOT NULL AUTO_INCREMENT,
+  `subscribeEmail` varchar(128) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  PRIMARY KEY (`subscribeID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `subscribers`
+--
+
+LOCK TABLES `subscribers` WRITE;
+/*!40000 ALTER TABLE `subscribers` DISABLE KEYS */;
+INSERT INTO `subscribers` VALUES (1,'alexrobbio860@gmail.com','2017-08-30 22:04:45');
+/*!40000 ALTER TABLE `subscribers` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `upvotes`
+--
+
+DROP TABLE IF EXISTS `upvotes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `upvotes` (
+  `submissionID` int(11) NOT NULL,
+  `likeByID` int(11) NOT NULL,
+  `createdAt` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `upvotes`
+--
+
+LOCK TABLES `upvotes` WRITE;
+/*!40000 ALTER TABLE `upvotes` DISABLE KEYS */;
+INSERT INTO `upvotes` VALUES (1,13,'2017-08-31 15:48:26');
+/*!40000 ALTER TABLE `upvotes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `userID` int(11) NOT NULL AUTO_INCREMENT,
+  `userFirstName` varchar(128) NOT NULL,
+  `userLastName` varchar(128) NOT NULL,
+  `userEmail` varchar(128) NOT NULL,
+  `userPassword` text NOT NULL,
+  `emailConfirmationToken` varchar(255) NOT NULL,
+  `passwordResetToken` varchar(255) NOT NULL,
+  `emailStatus` enum('Verified','Unverified') NOT NULL DEFAULT 'Unverified',
+  `userStatus` enum('Active','Block','Pending') NOT NULL DEFAULT 'Pending',
+  `userRole` int(11) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `lastLogin` datetime NOT NULL,
+  PRIMARY KEY (`userID`)
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (10,'Chris','Sullivian','chrissullivan794@gmail.com','$2a$10$Sx5mLt1vfvneZi1BMn.Ac.9Kfm1lJAtvM.hFOT487Z2ftC1ANaG.2','','','Verified','Active',3,'2017-08-23 03:29:46','2017-08-25 15:16:24','2017-08-25 12:28:13'),(11,'Admin','Robbio','alexrobbio860@gmail.com','$2a$10$eXUhVC0M6vaMW/H..RIIauBNO6mH2iYJLWuwMtN80v9Ya/jvddW22','','59a6fc516dfaf','Verified','Active',1,'2017-08-24 02:11:44','2017-08-24 02:11:44','2017-09-02 02:42:05'),(12,'Staff','Robbio','staff@gmail.com','$2a$10$Vq74b6SSudv7L2Nzn5TOyeTzejgsYU0oIRgCdssWqTpSRjBTB2HOC','','','Verified','Active',2,'2017-08-25 14:34:32','2017-08-25 15:44:23','0000-00-00 00:00:00'),(13,'User','Robbio','user@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-31 15:49:30'),(14,'User1','Dummy','user1@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(15,'User2','Dummy','user2@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(16,'User3','Dummy','user3@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(17,'User4','Dummy','user4@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(18,'User5','Dummy','user5@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(19,'User6','Dummy','user6@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(20,'User7','Dummy','user7@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(21,'User8','Dummy','user8@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(22,'User9','Dummy','user9@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(23,'User10','Dummy','user10@gmail.com','$2a$10$gGThZeGLKrUlBavqYO7pwewNbvzU/ESWmhl7aXhjsyRYYHjazpg56','','','Verified','Active',3,'2017-08-25 15:03:53','2017-08-25 15:52:17','2017-08-29 21:15:01'),(37,'asdf','asdf','alexrobbio8600@gmail.com','$2a$10$0ezRtdbBJG4sfnwv1ihgnug.HdIm4Uh1TiVIMei3c9sNVrprEOBI6','','','Verified','Active',3,'2017-08-31 16:34:22','2017-08-31 16:34:22','2017-08-31 16:34:51');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2017-09-02  2:44:24
