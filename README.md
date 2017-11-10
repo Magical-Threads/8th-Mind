@@ -38,6 +38,7 @@ access the sub-applications as follows:
 * if a more up-to-date mysqldump is available, replace the one in ./docker-entrypoint-initdb.d/content_portal.sql
 * run `docker-compose up -d` to start the containers in detached mode
 
+### Endpoints
 * View all submissions for an article `http://localhost:3000/articles/27/submissions/`
 * View all submission details `http://localhost:3000/articles/27/submissions/1`
 * Add submission `http://localhost:3000/articles/27/submissions/new`
