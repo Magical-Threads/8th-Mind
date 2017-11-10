@@ -1,0 +1,37 @@
+version: '2'
+services:
+  mysql:
+    image: mysql:latest
+    env_file: ./mysql.env
+    networks:
+      - em-net
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./data:/usr/local/mysqldata
+    working_dir: /docker-entrypoint-initdb.d
+    restart: always
+  admin:
+    build: ./admin
+    networks:
+      - em-net
+    env_file: ./web.env
+    volumes:
+      - ./phpconfig.ini:/usr/local/etc/php/conf.d/phpconfig.ini
+      - ./admin:/var/www/html
+      - ./storage:/var/www/html/storage
+      - ./test:/usr/src/app/test
+    ports:
+      - "8001:80"
+    restart: always
+  server:
+    build: ./server
+    networks:
+      - em-net
+    ports:
+      - "3000:3000"
+    volumes_from:
+      - admin
+    restart: always
+networks:
+  em-net:
+    driver: bridge
