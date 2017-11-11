@@ -19,35 +19,46 @@ var storageDir = '/var/www/html/storage/submission/photo/';
  */
 router.get('/articles', function(req, res){
 	var page = req.query.page;
-	var per_page=req.query.per_page;
+	var per_page = req.query.per_page;
+	var tag = req.query.tag;
 	if(!page){ page=1; }
 	if(!per_page){ per_page=10; }
 
 	var offset = (page - 1) * per_page;
 	var pagination=[];
 
+	var tag_phrase = tag ? "AND articles.articleTags='"+tag+"' " : "";
+
+	// console.error("@@@@@@ tag: ",tag," phrase: ",tag_phrase);
+
 	db.query("	SELECT count(*) as total" +
 		"		FROM articles " +
-		"		WHERE articles.articleStatus='Active'", function (err, all) {
+		"		WHERE articles.articleStatus='Active'"+tag_phrase, function (err, all) {
 
 		// todo: determine if we still need a left join here (will there ever be orphan articles with no userID?) -RJD
 
-		db.query("	SELECT articles.articleID, articles.articleTitle, articles.articleDescription," +
+		query = "	SELECT articles.articleID, articles.articleTitle, articles.articleDescription," +
 			"		 articles.articleImage, articles.articleTags, users.userFirstName, users.userLastName," +
 			"		 articles.articleStartDate " +
 			"		FROM articles " +
 			"		LEFT JOIN users on articles.userID=users.userID " +
 			"		WHERE articles.articleStatus='Active' " +
+			tag_phrase +
 			"		ORDER BY articleStartDate DESC " +
-			"		LIMIT "+offset+","+per_page, function (err, result) {
+			"		LIMIT "+offset+","+per_page;
 
-			var total_pages=Math.ceil(all[0]['total'] /per_page);
+			// console.log("@@@@ query string: '"+query+"'")
+
+			db.query(query, function (err, result) {
+
+			var total = (all && all.length > 0) ? all[0]['total'] : 0;
+			var total_pages = (all && all.length > 0) ? Math.ceil(all[0]['total'] /per_page) : 0;
 
 			pagination[0] = {
 				'page': page,
 				'per_page': per_page,
 				'total_pages': total_pages,
-				'total': all[0]['total']
+				'total': total
 			};
 
 			res.status(200).json({result,pagination});
@@ -57,14 +68,14 @@ router.get('/articles', function(req, res){
 });
 
 
-router.post('/articles/submission_like/:id',h.ensureLogin, function(req, res){ 
-    var userID=req.user.userID;   
+router.post('/articles/submission_like/:id',h.ensureLogin, function(req, res){
+    var userID=req.user.userID;
     var submissionID=req.params.id;
     var params = req.body;
     var createdAt = new Date();
     var articleID=params.articleID;
-    
-    
+
+
     if(articleID>0)
     {
          db.query(" SELECT * " +
@@ -72,77 +83,77 @@ router.post('/articles/submission_like/:id',h.ensureLogin, function(req, res){
              "      WHERE articles.articleStatus='Active' " +
              "       and articleID='"+articleID+"'"+
              "      LIMIT 1", function (err, result) {
-                        
+
                        if(result.length >0)
                        {
                             if(result[0]['articleAllowUpvoting']!='Yes')
                             {
                                 return res.status(200).json({success: false, errors: "Upvotes Not Allowed Against This Article.."});
                             }
-                            
-                             db.query("SELECT * from article_submissions where articleSubmissionID="+submissionID+" LIMIT 1", function (err, submission) { 
-                                    
+
+                             db.query("SELECT * from article_submissions where articleSubmissionID="+submissionID+" LIMIT 1", function (err, submission) {
+
                                     if(submission.length < 1)
                                     {
                                          return res.status(200).json({success: false, errors: "Upvotes Not Allowed Against This Article.."});
                                     }
                                     else
                                     {
-                                          db.query("SELECT * from upvotes where submissionID="+submissionID+" and likeByID="+userID+" LIMIT 1", function (err, res_like) 
-                                          { 
+                                          db.query("SELECT * from upvotes where submissionID="+submissionID+" and likeByID="+userID+" LIMIT 1", function (err, res_like)
+                                          {
                                                if(res_like.length < 1)
                                                 {
                                                       var ins={
                                                             submissionID:submissionID,
                                                             likeByID:userID,
-                                                            createdAt:createdAt                                                            
+                                                            createdAt:createdAt
                                                            };
                                                            var likes=submission[0].upVotes+1;
                                                            db.query('INSERT INTO upvotes SET ?',ins, function (err, upv) {
-                                                            var sql = "UPDATE article_submissions set upVotes=? WHERE articleSubmissionID = ?";       
-                                                                    db.query(sql,[likes,submissionID], function (err, res_sub) { 
+                                                            var sql = "UPDATE article_submissions set upVotes=? WHERE articleSubmissionID = ?";
+                                                                    db.query(sql,[likes,submissionID], function (err, res_sub) {
                                                                       return res.status(200).json({success: {'total_likes':likes,'type':'like'}, errors: false});
-                                                                    });                                       
-                                                                        
-                                                            
+                                                                    });
+
+
                                                             });
                                                 }
                                                 else
                                                 {
                                                     var likes=submission[0].upVotes-1;
                                                     db.query('DELETE FROM `upvotes` where likeByID=? and submissionID=?',[userID,submissionID], function (err, upv) {
-                                                            var sql = "UPDATE article_submissions set upVotes=? WHERE articleSubmissionID = ?";       
-                                                                    db.query(sql,[likes,submissionID], function (err, res_sub) { 
-                                                                      
+                                                            var sql = "UPDATE article_submissions set upVotes=? WHERE articleSubmissionID = ?";
+                                                                    db.query(sql,[likes,submissionID], function (err, res_sub) {
+
                                                                        return res.status(200).json({success: {'total_likes':likes,'type':'unlike'}, errors: false});
-                                                                    });                                       
-                                                                        
-                                                            
+                                                                    });
+
+
                                                             });
-                                                    
+
                                                 }
-                                          
+
                                           });
                                     }
                                 });
-                            
-                            
+
+
                        }
                        else
                        {
                          return res.status(200).json({success: false, errors: "Upvoting Not Allowed Against This Article.."});
-                       }               
-                
-                
-                            
-              });  
+                       }
+
+
+
+              });
     }
     else
     {
        return res.status(200).json({success: false, errors: "Something Wrong."});
-    } 
-      
-    
+    }
+
+
 });
 
 
@@ -1139,20 +1150,20 @@ router.get('/articles/gallery/:id',h.tokenDecode,function(req, res){
     var per_page=req.query.per_page;
     if(!page){ page=1; }
     if(!per_page){ per_page=12; }
-    
+
     var offset = (page - 1) * per_page;
     var pagination=[];
 
     // if user is logged in...
     if(req.user)
     {
-        var userID=req.user.userID; 
+        var userID=req.user.userID;
         var qry="SELECT article_submissions.*,users.userFirstName,users.userLastName,upvotes.likeByID  FROM article_submissions LEFT JOIN users on article_submissions.userID=users.userID LEFT JOIN upvotes on article_submissions.articleSubmissionID = upvotes.submissionID and upvotes.likeByID = "+userID+" where article_submissions.articleID="+articleID+" order by upVotes desc LIMIT "+offset+","+per_page;
     }
     else
-    { 
+    {
         var qry="SELECT article_submissions.*,users.userFirstName,users.userLastName FROM article_submissions LEFT JOIN users on article_submissions.userID=users.userID where article_submissions.articleID="+articleID+" order by upVotes desc LIMIT "+offset+","+per_page;
-    
+
     }
     db.query("SELECT articleAllowGallery,articleID,articleTitle,articleSubmissionType,articleAllowUpvoting  FROM articles where articleID="+articleID+" and articleStatus='Active'", function (err, article) {
         if(article.length ==0 )
@@ -1166,54 +1177,54 @@ router.get('/articles/gallery/:id',h.tokenDecode,function(req, res){
                 return res.status(200).json('');
             }
         }
-       db.query("SELECT count(*) as total FROM article_submissions where articleID="+articleID, function (err, all) {                            
-                
-                     db.query(qry, function (err, result) {                            
-                        
+       db.query("SELECT count(*) as total FROM article_submissions where articleID="+articleID, function (err, all) {
+
+                     db.query(qry, function (err, result) {
+
                      var total_pages=Math.ceil(all[0]['total'] /per_page);
-                        
+
                         pagination[0] = {
                             'page': page,
                             'per_page': per_page,
                             'total_pages': total_pages,
                             'total': all[0]['total']
                             };
-                        
-                        res.status(200).json({result,article,pagination});              
-                      
-                      
-                      
+
+                        res.status(200).json({result,article,pagination});
+
+
+
                       });
                  });
-            });   
+            });
      });
 
 
 
-router.post('/articles/submission/:id',h.ensureLogin, function(req, res){ 
-    var userID=req.user.userID;   
+router.post('/articles/submission/:id',h.ensureLogin, function(req, res){
+    var userID=req.user.userID;
     var articleID=req.params.id;
-     var form = new formidable.IncomingForm();    
+     var form = new formidable.IncomingForm();
      form.multiples = false;
      const dateTime = Date.now();
      const timestamp = Math.floor(dateTime / 1000);
-     var filenames=timestamp.toString(); 
+     var filenames=timestamp.toString();
      var createdAt = new Date();
-    
-    
+
+
     if(articleID>0)
     {
-         db.query("SELECT articles.* from articles  where articles.articleStatus='Active' and articleID="+articleID+" LIMIT 1", function (err, result) {                            
-                        
+         db.query("SELECT articles.* from articles  where articles.articleStatus='Active' and articleID="+articleID+" LIMIT 1", function (err, result) {
+
                        if(result.length >0)
                        {
                             if(result[0]['articleAllowSubmission']!='Yes')
                             {
                                 return res.status(200).json({success: false, errors: "Submission Not Allowed Against This Article.."});
                             }
-                            
-                             db.query("SELECT * from article_submissions  where  userID="+userID+" and articleID="+articleID+" LIMIT 1", function (err, submission) { 
-                                    
+
+                             db.query("SELECT * from article_submissions  where  userID="+userID+" and articleID="+articleID+" LIMIT 1", function (err, submission) {
+
                                     if(submission.length >0)
                                     {
                                         return res.status(200).json({success: false, errors: "Already Submit"});
@@ -1229,17 +1240,17 @@ router.post('/articles/submission/:id',h.ensureLogin, function(req, res){
                                                         var submissionType=fields['submissionType'];
                                                         if(submissionType=="Photo")
                                                         {
-                                                          
+
                                                             if(Object.keys(files).length==0)
                                                             {
                                                                 return res.status(200).json({success: false, errors: "Photo are required"});
                                                             }
-                                                            
-                                                            
+
+
                                                              form.uploadDir = path.join(__dirname, '../storage/submission/photo/');
-                                                             
+
                                                               var oldpath = files.file.path;
-                                                           
+
                                                               filenames=filenames+files.file.name;
                                                               fs.copy(oldpath, path.join(form.uploadDir, filenames), function (err) {
                                                                   var ins={
@@ -1249,19 +1260,19 @@ router.post('/articles/submission/:id',h.ensureLogin, function(req, res){
                                                                         submissionContent:filenames,
                                                                         createdAt:createdAt
                                                                        };
-                                                                       
+
                                                                        db.query('INSERT INTO article_submissions SET ?',ins, function (err, subs) {
-                                                        						if (err) throw err;	
-                                                                                 return res.status(200).json({success: true, errors:false});                                                        						
+                                                        						if (err) throw err;
+                                                                                 return res.status(200).json({success: true, errors:false});
                                                         					  });
-                                                                
-                                                                
-                                                                
+
+
+
                                                               });
-                                                             
-                                                           
-                                                            
-                                                            
+
+
+
+
                                                         }
                                                         else if(submissionType=="File")
                                                         {
@@ -1269,12 +1280,12 @@ router.post('/articles/submission/:id',h.ensureLogin, function(req, res){
                                                             {
                                                                 return res.status(200).json({success: false, errors: "File are required"});
                                                             }
-                                                            
-                                                            
+
+
                                                              form.uploadDir = path.join(__dirname, '../storage/submission/file/');
-                                                             
+
                                                               var oldpath = files.file.path;
-                                                           
+
                                                               filenames=filenames+files.file.name;
                                                               fs.copy(oldpath, path.join(form.uploadDir, filenames), function (err) {
                                                                   var ins={
@@ -1284,15 +1295,15 @@ router.post('/articles/submission/:id',h.ensureLogin, function(req, res){
                                                                         submissionContent:filenames,
                                                                         createdAt:createdAt
                                                                        };
-                                                                       
+
                                                                        db.query('INSERT INTO article_submissions SET ?',ins, function (err, subs) {
-                                                        						if (err) throw err;	
-                                                                                 return res.status(200).json({success: true, errors:false});                                                        						
+                                                        						if (err) throw err;
+                                                                                 return res.status(200).json({success: true, errors:false});
                                                         					  });
-                                                                
-                                                                
+
+
                                                               });
-                                                            
+
                                                         }
                                                         else
                                                         {
@@ -1302,7 +1313,7 @@ router.post('/articles/submission/:id',h.ensureLogin, function(req, res){
                                                                 return res.status(200).json({success: false, errors: "submissionContentVideo are required"});
                                                              }
                                                              submissionContentVideo=submissionContentVideo.replace('watch?v=', 'embed/')
-                                                             
+
                                                                var ins={
                                                                         articleID:articleID,
                                                                         userID:userID,
@@ -1310,36 +1321,36 @@ router.post('/articles/submission/:id',h.ensureLogin, function(req, res){
                                                                         submissionContent:submissionContentVideo,
                                                                         createdAt:createdAt
                                                                        };
-                                                                       
+
                                                                        db.query('INSERT INTO article_submissions SET ?',ins, function (err, subs) {
-                                                        						if (err) throw err;	
-                                                                                 return res.status(200).json({success: true, errors:false});                                                        						
+                                                        						if (err) throw err;
+                                                                                 return res.status(200).json({success: true, errors:false});
                                                         					  });
                                                         }
-                                                        
-                                                   
+
+
                                                     });
-                                   
+
                                    }
                                 });
-                            
-                            
+
+
                        }
                        else
                        {
                          return res.status(200).json({success: false, errors: "Submission Not Allowed Against This Article.."});
-                       }               
-                
-                
-                            
-              });  
+                       }
+
+
+
+              });
     }
     else
     {
        return res.status(200).json({success: false, errors: "Something Wrong."});
-    } 
-      
-    
+    }
+
+
 });
 
 
@@ -1368,42 +1379,42 @@ router.get('/articles/tag/:tag', function(req, res) {
 });
 
 
-router.get('/articles/top', function(req, res){   
+router.get('/articles/top', function(req, res){
      db.query(" SELECT articles.articleID,articles.articleTitle,articles.articleDescription,articles.articleImage,users.userFirstName,users.userLastName " +
          "      FROM articles " +
          "      LEFT JOIN users on articles.userID=users.userID " +
          "      WHERE articles.articleStatus='Active' " +
          // "      ORDER BY articleID DESC" +
          "      LIMIT 15", function (err, result) {
-                res.status(200).json(result);               
+                res.status(200).json(result);
               });
-           });     
-router.get('/articles/detail/:id', function(req, res){ 
+           });
+router.get('/articles/detail/:id', function(req, res){
     var articleID=req.params.id;
     if(articleID>0)
     {
-         db.query("SELECT articles.*,users.userFirstName,users.userLastName FROM articles LEFT JOIN users on articles.userID=users.userID where articles.articleStatus='Active' and articleID="+articleID+" LIMIT 1", function (err, result) {                            
-                res.status(200).json(result);               
-              });  
+         db.query("SELECT articles.*,users.userFirstName,users.userLastName FROM articles LEFT JOIN users on articles.userID=users.userID where articles.articleStatus='Active' and articleID="+articleID+" LIMIT 1", function (err, result) {
+                res.status(200).json(result);
+              });
     }
     else
     {
         res.status(200).json('');
-    }             
+    }
 });
 
-router.get('/articles/related/:id', function(req, res){ 
+router.get('/articles/related/:id', function(req, res){
     var articleID=req.params.id;
     if(articleID>0)
     {
-         db.query("SELECT articles.articleID,articles.articleTitle,articles.articleDescription,articles.articleImage,users.userFirstName,users.userLastName FROM articles LEFT JOIN users on articles.userID=users.userID where articles.articleStatus='Active' and articleID!="+articleID+" LIMIT 8", function (err, result) {                            
-                res.status(200).json(result);               
-              });  
+         db.query("SELECT articles.articleID,articles.articleTitle,articles.articleDescription,articles.articleImage,users.userFirstName,users.userLastName FROM articles LEFT JOIN users on articles.userID=users.userID where articles.articleStatus='Active' and articleID!="+articleID+" LIMIT 8", function (err, result) {
+                res.status(200).json(result);
+              });
     }
     else
     {
         res.status(200).json('');
-    }             
+    }
 });
 
 

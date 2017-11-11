@@ -6,17 +6,17 @@ export default ApplicationAdapter.extend({
 		// console.log('submission apdapter',{modelName, id, snapshot, requestType, query})
 
 		if (requestType === 'findRecord') {
-			return `${this.host}/articles/${id}/submissions/`;
+			return `${this.host}articles/${id}/submissions/`;
 		}
 		else if (requestType === 'peekRecord') {
-			return `${this.host}/articles/${id}/submissions/`;
+			return `${this.host}articles/${id}/submissions/`;
 		}
 		else if (requestType === 'deleteRecord') {
-			
+
 			const articleID = 		snapshot.adapterOptions.articleID
 			const submissionID = 	snapshot.adapterOptions.submissionID;
 			const assetID = 		snapshot.adapterOptions.assetID
-			const url = 			`${this.host}/articles/${articleID}/submissions/${submissionID}/asset/${assetID}`;
+			const url = 			`${this.host}articles/${articleID}/submissions/${submissionID}/asset/${assetID}`;
 
 			// console.log('deleting...', url);
 
@@ -24,8 +24,8 @@ export default ApplicationAdapter.extend({
 		}
 		else {
 			return new Error(
-				'Check submission adapter to support a new requestType.', 
-				'adapter/submission.js',  
+				'Check submission adapter to support a new requestType.',
+				'adapter/submission.js',
 				modelName, id, snapshot, requestType, query);
 		}
 	},
