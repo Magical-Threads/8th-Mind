@@ -1,0 +1,23 @@
+# Files to ignore from git
+
+### Ember ###
+# see https://github.com/ember-cli/ember-cli/blob/master/blueprints/app/files/gitignore
+# compiled output
+
+/frontend/tmp
+/frontend/dist
+
+# dependencies
+node_modules
+/frontend/bower_components
+
+# misc
+.sass-cache
+connect.lock
+coverage/*
+libpeerconnection.log
+npm-debug.log
+testem.log
+.DS_Store
+
+web.env
