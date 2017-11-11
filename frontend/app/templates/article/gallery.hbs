@@ -1,8 +1,8 @@
 {{!-- {{log 'article/gallery.hbs' model}} --}}
 <section id="article-gallery">
-	
+
 	<div class="article-wrap">
-	
+
 		<div class="article-heading"><h1 class="article-title">{{model.article.title}} Gallery</h1></div>
 
 			<div class="article-meta">
@@ -10,36 +10,39 @@
 					<svg viewBox="0 0 11.05 16.8"><polyline points="8.6,15.5 1.2,8.2 8.6,1.2"></polyline></svg>
 				</span>
 				{{#link-to "article" model.article.id}} Back to the Challenge {{/link-to}}
-				<button id="button-show-upload" type="button" class="button button-blue" {{action "showGallerySubmission"}}>Create Your Submission</button>
+				<button id="button-show-upload" type="button" class="button button-blue"
+					{{action "showGallerySubmission"}}>Create Your Submission</button>
 				{{challenge-submit model=model}}
 			</div>
 
 			{{!-- Submission Type - Photo --}}
 			{{#if (eq model.article.submissionType "Photo")}}
-				
+
 				{{!-- <div class="be-the-first">
 					<div class="text">
 						<p>Be the first to submit to</p>
 						<h4 class='title'>{{model.article.title}} gallery</h4>
-						<button id="button-show-upload" type="button" class="button button-blue" {{action "showGallerySubmission"}}>Create Your Submission</button>
+						<button id="button-show-upload" type="button"
+							class="button button-blue" {{action "showGallerySubmission"}}
+							>Create Your Submission</button>
 					</div>
 				</div> --}}
 				{{log model}}
 				<div class="challenge-submissions">
 					{{#each model.article.submissions as |submission index|}}
-						{{challenge-submission 
+						{{challenge-submission
 							articleID=model.article.id
-							submission=submission 
+							submission=submission
 							session=model.session
 							store=model.store
 						}}
 					{{/each}}
 				</div>
-				
+
 				{{!-- {{#isotope-grid}} --}}
-					
+
 				{{!-- {{/isotope-grid}} --}}
-				
+
 			{{/if}}
 
 		</div><!-- article-wrap -->
