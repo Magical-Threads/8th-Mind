@@ -1,1 +1,0 @@
-/Users/marioluevanos/Web Development/_8thmind/frontend/tmp/creator-output_path-KefUcNSF.tmp/version.js

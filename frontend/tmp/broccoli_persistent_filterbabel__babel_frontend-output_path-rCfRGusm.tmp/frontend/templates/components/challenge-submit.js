@@ -1,8 +1,0 @@
-define("frontend/templates/components/challenge-submit", ["exports"], function (exports) {
-  "use strict";
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.default = Ember.HTMLBars.template({ "id": "T85crCAM", "block": "{\"symbols\":[\"&default\"],\"statements\":[[11,1],[0,\"\\n\"],[6,\"form\"],[9,\"id\",\"add-submission\"],[9,\"method\",\"POST\"],[7],[0,\"\\n\\t\"],[6,\"div\"],[9,\"class\",\"form-group\"],[7],[0,\"\\n\\t\\t\"],[6,\"label\"],[9,\"for\",\"submissionTitle\"],[7],[0,\"Title\"],[8],[0,\"\\n\\t\\t\"],[1,[25,\"input\",null,[[\"name\",\"type\",\"id\"],[\"submissionTitle\",\"text\",\"submissionTitle\"]]],false],[0,\"\\n\\t\"],[8],[0,\"\\n\\t\"],[6,\"div\"],[9,\"class\",\"form-group\"],[7],[0,\"\\n\\t\\t\"],[6,\"label\"],[9,\"for\",\"caption\"],[7],[0,\"Caption\"],[8],[0,\"\\n\\t\\t\"],[1,[25,\"input\",null,[[\"name\",\"type\",\"id\"],[\"caption\",\"text\",\"caption\"]]],false],[0,\"\\n\\t\"],[8],[0,\"\\n\"],[8],[0,\"\\n\"],[6,\"form\"],[9,\"id\",\"add-asset\"],[9,\"method\",\"POST\"],[7],[0,\"\\n\\t\"],[6,\"div\"],[9,\"class\",\"form-group\"],[7],[0,\"\\n\\t\\t\"],[6,\"label\"],[9,\"for\",\"assetFile\"],[7],[0,\"File Upload\"],[8],[0,\"\\n\\t\\t\"],[1,[25,\"input\",null,[[\"name\",\"type\",\"id\"],[\"assetFile\",\"file\",\"assetFile\"]]],false],[0,\"\\n\\t\"],[8],[0,\"\\n\"],[8],[0,\"\\n\"],[6,\"button\"],[9,\"id\",\"button-submit\"],[9,\"type\",\"button\"],[9,\"class\",\"button button-teal hidden\"],[3,\"action\",[[19,0,[]],\"create\",[19,0,[\"model\",\"article\",\"id\"]]]],[7],[0,\"Submit\"],[8],[0,\"\\n\"]],\"hasEval\":false}", "meta": { "moduleName": "frontend/templates/components/challenge-submit.hbs" } });
-});

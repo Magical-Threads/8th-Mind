@@ -1,1 +1,0 @@
-export default Ember.HTMLBars.template({"id":"DcEWDYWn","block":"{\"symbols\":[],\"statements\":[[1,[20,[\"headTag\",\"content\"]],false],[0,\"\\n\"]],\"hasEval\":false}","meta":{"moduleName":"ember-cli-meta-tags/templates/components/head-tag.hbs"}});

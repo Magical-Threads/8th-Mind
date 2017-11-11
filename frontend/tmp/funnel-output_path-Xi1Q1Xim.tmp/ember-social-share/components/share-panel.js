@@ -1,1 +1,0 @@
-/Users/marioluevanos/Web Development/_8thmind/frontend/tmp/funnel-input_base_path-koNofg5j.tmp/components/share-panel.js

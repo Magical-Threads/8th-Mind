@@ -1,1 +1,0 @@
-/Users/marioluevanos/Web Development/_8thmind/frontend/node_modules/ember-cli-meta-tags/app/instance-initializers/head-tags.js

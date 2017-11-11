@@ -1,1 +1,0 @@
-/Users/marioluevanos/Web Development/_8thmind/frontend/app/helpers/ember-cli-lightbox.js
