@@ -12,7 +12,7 @@
 				{{#link-to "article" model.article.id}} Back to the Challenge {{/link-to}}
 				<button id="button-show-upload" type="button" class="button button-blue"
 					{{action "showGallerySubmission"}}>Create Your Submission</button>
-				{{challenge-submit model=model}}
+				{{challenge-submit model=model store=store}}
 			</div>
 
 			{{!-- Submission Type - Photo --}}
@@ -31,7 +31,7 @@
 				<div class="challenge-submissions">
 					{{#each model.article.submissions as |submission index|}}
 						{{challenge-submission
-							articleID=model.article.id
+							article=model.article
 							submission=submission
 							session=model.session
 							store=model.store

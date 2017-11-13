@@ -290,8 +290,8 @@ router.get('/articles/:article/submissions/:id/', h.tokenDecode, function(req, r
 
 			// empty result set
 			if(sub.length == 0) {
-				console.log('Empty set from query');
-				res.status(200).json({
+				// console.log('Empty set from query');
+				res.status(404).json({
 					success: false,
 					errors: "Invalid articleSubmissionID ("+subId+")"
 				});
@@ -406,7 +406,7 @@ router.delete('/articles/:article/submissions/:id/', h.ensureLogin, function(req
 							// ensure row was deleted
 							if(result.affectedRows == 1) {
 								res.status(200).json({
-									success: true
+									success: true,
 								});
 							}
 							else {
@@ -500,6 +500,8 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 	var userID = req.user.userID;
 	var articleID = req.params.id;
 
+	console.log('@@@@ Create new submission: ',userID,' article ',articleID,' body: ',req.body);
+
 	// form processing
 	const dateTime = Date.now();
 	const timestamp = Math.floor(dateTime / 1000);
@@ -563,27 +565,29 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 
 		else {
 
-			// parse form
-			var form = new formidable.IncomingForm();
-			form.multiples = false;
-
-			form.parse(req, function (err, fields, files) {
-
-				if(err) {
-					console.error(err.stack);
-					res.status(200).json({
-						success: false,
-						errors: "Error while parsing user form."
-					});
-				}
-
-				else {
+			// // parse form
+			// var form = new formidable.IncomingForm();
+			// form.multiples = false;
+      //
+			// form.parse(req, function (err, fields, files) {
+      //
+			// 	if(err) {
+			// 		console.error(err.stack);
+			// 		res.status(200).json({
+			// 			success: false,
+			// 			errors: "Error while parsing user form."
+			// 		});
+			// 	}
+      //
+			// 	else {
+			// 		console.log('@@@@ Parsed fields from form: ',fields);
 
 					// build record to be inserted
 					var submission = {
 						articleID: articleID,
 						userID: userID,
-						title: (fields['submissionTitle']) ? fields['submissionTitle'] : '',
+						// title: (fields['submissionTitle']) ? fields['submissionTitle'] : '',
+						title: (req.body['submissionTitle']) ? req.body['submissionTitle'] : '',
 						status: "Draft"
 					};
 
@@ -619,9 +623,9 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 						});
 
 					}
-				}
+				// }
 
-			}); // end form.parse
+			// }); // end form.parse
 
 		} // end big 'else'
 
@@ -641,6 +645,8 @@ router.post('/articles/:article/submissions/:id/upvote', h.ensureLogin, function
 
 	var userID = req.user.userID;
 	var articleSubmissionID = req.params.id;
+
+	console.log('@@@@ Create new upvote: ',userID,' article ',articleSubmissionID);
 
 	// validate the articleSubmissionID
 	db.query("	SELECT articleSubmissionID" +
@@ -757,6 +763,8 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 	var userID = req.user.userID;
 	var articleSubmissionID = req.params.id;
+
+	console.log('@@@@ Create new asset: ',userID,' article ',articleSubmissionID);
 
 	// validate the articleSubmissionID
 	db.query("	SELECT articleSubmissionID" +

@@ -1,8 +1,8 @@
 var jwt = require('jsonwebtoken');
 
 exports.tokenDecode = function(req, res, next){
-    var token = req.headers['access_token'];     
-  
+    var token = req.headers['access_token'];
+
     if (token != null) {
         jwt.verify(token, 'secret', function(err, decoded) {
             if (err) {
@@ -59,7 +59,7 @@ exports.ensureLogin = function(req, res, next){
 
 	// need error handling for when header is missing
 
-    var newtok=token.replace('Bearer ', '') ;
+    var newtok=token && token.replace('Bearer ', '') ;
 
     if (newtok) {
         jwt.verify(newtok, 'secret', function(err, decoded) {

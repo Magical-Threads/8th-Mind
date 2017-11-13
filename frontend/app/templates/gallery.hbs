@@ -26,20 +26,20 @@
 								<h4 class='title'>{{model.article.title}} gallery</h4>
 								<button id="button-show-upload" type="button" class="button button-blue" {{action "showGallerySubmission"}}>Create Your Submission</button>
 							</div>
-							{{gallery-submission model=model}}
+							{{gallery-submission model=model store=store}}
 						</div>
 					{{else}}
-						{{#gallery-submission model=model}}
+						{{#gallery-submission model=model store=store}}
 							<button id="button-show-upload" type="button" class="button button-blue" {{action "showGallerySubmission"}}>Create Your Submission</button>
 						{{/gallery-submission}}
 					{{/if}}
-					
+
 					{{#isotope-grid}}
 						{{#each model.gallery as |gallery index|}}
 							{{gallery-post gallery=gallery model=model session=session data-submission-id=gallery.id}}
 						{{/each}}
 					{{/isotope-grid}}
-					
+
 				{{/if}}
 
 			</div><!-- article-wrap -->

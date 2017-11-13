@@ -1,5 +1,5 @@
 <div class="challenge-submission-images">
-	
+
 	{{!-- {{#if (eq gallery.assets.length 1) }} --}}
 	{{!-- {{log articleID submission session}} --}}
 
@@ -8,7 +8,7 @@
 				{{#if session.success}}
 					{{#if (eq submission.userID session.userID)}}
 						<div class="challenge-submission-edit">
-							<button class='delete' {{action 'deleteAsset' articleID submission.id asset.id store}}>Delete</button>
+							<button class='delete' {{action 'deleteAsset' article submission asset store}}>Delete</button>
 						</div>
 					{{/if}}
 				{{/if}}
@@ -16,7 +16,7 @@
 			</div>
 		{{/each}}
 
-	
+
 </div>
 
 <div class="challenge-submission-data">
@@ -54,6 +54,15 @@
 			{{/if}}
 		{{/if}}
 	</div>
+
+	{{#if session.success}}
+		{{#if (eq submission.userID session.userID)}}
+			<div class="challenge-submission-edit">
+				<button class='delete' {{action 'deleteSubmission' article submission store}}>Delete</button>
+			</div>
+		{{/if}}
+	{{/if}}
+
 </div>
 
 {{yield}}

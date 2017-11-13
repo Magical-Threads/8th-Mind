@@ -2,9 +2,9 @@ import DS from 'ember-data';
 
 export default DS.RESTSerializer.extend({
 	normalizeResponse (store, primaryModelClass, payload, id, requestType) {
-		
+
 		const convertToBoolean = string => string.toLowerCase() === 'yes' ? true : false;
-		
+
 		if (requestType === 'findRecord') {
 			payload = {
 				article: payload.map(article => {
@@ -36,9 +36,13 @@ export default DS.RESTSerializer.extend({
 				})[0]
 			};
 		}
+		else if (requestType === 'deleteRecord') {
+			console.log('@@@@ Serializer handle delete record');
+		}
 		else {
+			// console.log('@@@@ Noramalizing ',requestType,' payload: ',payload);
 			payload = {
-				articles: payload.result.map(article => {
+				articles: (payload.result || []).map(article => {
 					return {
 						id: 		article.articleID,
 						body: 		article.articleDescription,
@@ -49,9 +53,13 @@ export default DS.RESTSerializer.extend({
 						title: 		article.articleTitle,
 						firstName: 	article.userFirstName,
 						lastName: 	article.userLastName,
+						url: 				`http://8thmind.com/article/${article.articleID}`,
+						links: {
+							submissions: `/articles/${article.articleID}/submissions/`
+						}
 					};
 				})
-			};	
+			};
 		}
 		// console.log(`Payload for requestType: ${requestType}`, payload)
 		return this._super(store, primaryModelClass, payload, id, requestType);

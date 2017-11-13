@@ -5,6 +5,8 @@ services:
     env_file: ./mysql.env
     networks:
       - em-net
+    ports:
+      - "3306:3306"
     volumes:
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - ./data:/usr/local/mysqldata
