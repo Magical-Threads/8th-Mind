@@ -7,10 +7,4 @@ var con = mysql.createConnection({
   database: "content_portal"
 });
 
-
-con.connect(function(err) {
-  if (err) throw err;
-  console.log("--- Database Connected ---");
-});
-
 module.exports = con;

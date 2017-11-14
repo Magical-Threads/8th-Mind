@@ -1,12 +1,7 @@
 var mysql = require('mysql');
+var env = process.env.NODE_ENV || 'prod';
 
-var con = mysql.createConnection({
-  host: "mysql",
-  user: "root",
-  password: "Robbio123",
-  database: "content_portal"
-});
-
+var con = require('./db-'+env);
 
 con.connect(function(err) {
   if (err) throw err;

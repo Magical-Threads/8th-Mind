@@ -1,4 +1,4 @@
 #!/bin/bash
-./rebuild mysql
-./rebuild admin
-./rebuild server
+./rebuild.sh mysql
+./rebuild.sh admin
+./rebuild.sh server
