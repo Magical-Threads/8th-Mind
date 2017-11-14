@@ -1,7 +1,7 @@
 {
   "name": "cps",
   "version": "1.0.0",
-  "description": "server side for Content Portal\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D",
+  "description": "server side for Content Portal",
   "main": "index.js",
   "scripts": {
     "test": "node --expose-internals ./node_modules/.bin/mocha --exit --reporter spec",
@@ -15,7 +15,6 @@
     "body-parser": "^1.17.2",
     "chai": "^4.1.2",
     "cors": "^2.8.4",
-    "crypto": "^1.0.1",
     "ejs": "^2.5.7",
     "express": "^4.15.4",
     "express-session": "^1.15.5",
@@ -27,7 +26,7 @@
     "jsonwebtoken": "^7.4.3",
     "mocha": "^4.0.1",
     "morgan": "^1.8.2",
-    "mysql": "^2.14.1",
+    "mysql": "^2.15.0",
     "mysqli": "^2.0.1",
     "nodemailer": "^4.0.1",
     "nodemailer-smtp-transport": "^2.7.4",

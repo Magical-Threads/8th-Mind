@@ -13,10 +13,10 @@ before(function() {
   s = server;
 });
 after(async function() {
-  console.log('@@@@ Terminating server');
+  // console.log('@@@@ Terminating server');
   // s.close();
   s.shutdown(function() {
-    console.log('@@@@ Server shutdown');
+    // console.log('@@@@ Server shutdown');
   })
 });
 
@@ -25,7 +25,7 @@ describe("server setup", function() {
     return chai.request(a)
     .get('/ping')
     .then((res) => {
-      console.log('@@@@ Verifying end conditions');
+      // console.log('@@@@ Verifying end conditions');
       expect(res).to.exist
       expect(res.body).to.deep.equal({success: true})
     });

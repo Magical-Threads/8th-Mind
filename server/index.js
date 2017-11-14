@@ -1,17 +1,17 @@
-var express = require('express');
-var logger = require('morgan');
-var bodyParser = require('body-parser');
-var cors = require('cors');
-var jwt = require('jsonwebtoken');
-var db = require('./db');
-var expressValidator = require('express-validator');
-var bcrypt = require('bcryptjs');
-var crypto = require('crypto');
-var path = require('path');
-var transport = require('./mailer');
+let express = require('express');
+let logger = require('morgan');
+let bodyParser = require('body-parser');
+let cors = require('cors');
+let jwt = require('jsonwebtoken');
+let db = require('./db');
+let expressValidator = require('express-validator');
+let bcrypt = require('bcryptjs');
+let crypto = require('crypto');
+let path = require('path');
+let transport = require('./mailer');
 
-var app = express();
-var port = process.env.NODE_ENV == 'test' ? '3001' : '3000';
+let app = express();
+let port = process.env.NODE_ENV == 'test' ? '3001' : '3000';
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -33,7 +33,7 @@ app.use('/test', express.static(path.join(__dirname, 'test')));
 // request that pings the server.  Used in tests, and can be used for
 // alive testing.
 app.get('/ping', function(req, res) {
-  console.log('@@@@ Ping request');
+  // console.log('@@@@ Ping request');
   res.status(200).json({
     success: true,
   });
@@ -41,7 +41,7 @@ app.get('/ping', function(req, res) {
 
 app.use(expressValidator({
   errorFormatter: function(param, msg, value) {
-    var namespace = param.split('.')
+    let namespace = param.split('.')
       , root      = namespace.shift()
       , formParam = root;
 
@@ -60,7 +60,7 @@ app.use(require('./routes/security'));
 app.use(require('./routes/users'));
 app.use(require('./routes/articles'));
 
-var server = app.listen(port,function(){
+let server = app.listen(port,function() {
     console.log('--- Server starts at port '+port+' ---');
 });
 

@@ -1,76 +1,33 @@
-var express = require('express');
-var router = express.Router();
-var http = require('http');
-var path = require('path');
-var h = require('../helpers');
-var db = require('../db');
+let express = require('express');
+let router = express.Router();
+let http = require('http');
+let path = require('path');
+let h = require('../helpers');
+let db = require('../db');
+let User = require('../models/user');
 
 // configuration (should move to ENV or config file)
-var storageDir = '/var/www/html/storage/submission/photo/';
+let storageDir = '/var/www/html/storage/submission/photo/';
 
 
 router.post('/login', function(req, res, next){
-    var params = req.body;
-
-     db.query("SELECT * FROM users WHERE userEmail = '"+params.username+"'", function (err, user, fields) {
-               if (user.length==0)
-                {
-                   return res.status(422).json({success: false, errors: "No user exist with this Email: "+params.username});
-                }
-
-                bcrypt.compare(params.password, user[0].userPassword, function(err, isMatch) {
-                    if(isMatch)
-                    {
-
-                       if(user[0].emailStatus=='Unverified')
-                       {
-                         return res.status(422).json({success: false, errors: "Email is not Verified"});
-                       }
-                       else if(user[0].userStatus !='Active' )
-                       {
-                         return res.status(422).json({success: false, errors: "Account Inactive, Please Contact Administrator."});
-                       }
-                       else if(user[0].userRole !=3)
-                       {
-                         return res.status(422).json({success: false, errors: "Access Denied"});
-                       }
-                       else
-                       {
-                            var lastLogin = new Date();
-							var userID=user[0].userID;
-                            user_tok = {
-                            userID: user[0].userID,
-							userEmail: user[0].userEmail
-
-                            };
-                            var token = jwt.sign(user_tok, 'secret');
-
-                            var sql = "UPDATE users set lastLogin=? WHERE userID = ?";
-                            db.query(sql,[lastLogin,userID], function (err, user) {
-
-                            });
-
-                             res.status(200).json({
-                                    success: true,
-                                    access_token: token,
-                                    userID: userID,
-                                    userFirstName: user[0].userFirstName,
-                                    userLastName: user[0].userLastName
-                                });
-
-                       }
-                    }
-                    else
-                    {
-                        return res.status(422).json({success: false, errors: "Wrong Password"});
-                    }
-
-
-                });
-
-
-              });
-
+  let params = req.body;
+  let email = params.username;
+  let password = params.password;
+  let user = User.login(email, password);
+  if (user == null) {
+    return res.status(422).json({success: false, errors: "No user exist with this Email: "+params.username});
+  } else if (user.errors) {
+    return res.status(422).json({success: false, errors: user.errors});
+  } else {
+    res.status(200).json({
+      success: true,
+      access_token: user.token,
+      userID: user.id,
+      userFirstName: user.userFirstName,
+      userLastName: user.userLastName
+    });
+  }
 });
 
 
