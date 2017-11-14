@@ -21,13 +21,13 @@ after(async function() {
 });
 
 describe("server setup", function() {
-    it("starts up in tests", async function() {
-      return chai.request(a)
-      .get('/ping')
-      .then((res) => {
-        console.log('@@@@ Verifying end conditions');
-        expect(res).to.exist
-        expect(res.body).to.deep.equal({success: true})
-      });
+  it("starts up in tests", async function() {
+    return chai.request(a)
+    .get('/ping')
+    .then((res) => {
+      console.log('@@@@ Verifying end conditions');
+      expect(res).to.exist
+      expect(res.body).to.deep.equal({success: true})
     });
+  });
 });
