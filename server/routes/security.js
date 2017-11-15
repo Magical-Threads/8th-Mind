@@ -5,6 +5,9 @@ let path = require('path');
 let h = require('../helpers');
 let db = require('../db');
 let User = require('../models/user');
+let bcrypt = require('bcryptjs');
+let crypto = require('crypto');
+let transport = require('../mailer');
 
 // configuration (should move to ENV or config file)
 let storageDir = '/var/www/html/storage/submission/photo/';
@@ -31,118 +34,53 @@ router.post('/login', function(req, res, next){
 });
 
 
-router.post('/register', function(req, res, next){
-	var params = req.body;
+router.post('/register', function(req, res, next) {
+	let params = req.body;
 	req.checkBody('userFirstName', 'FirstName Required').notEmpty();
 	req.checkBody('userLastName', 'LastName Required').notEmpty();
 	req.checkBody('userEmail', 'Email Required').notEmpty();
 	req.checkBody('userPassword', 'Password Required').notEmpty();
 
-
-
-   var subscribeCheck=params.subscribeCheck;
-    req.getValidationResult().then(function(result) {
-        if (!result.isEmpty()) {
-          return res.status(200).json({success: false, errors: "All fields are required"});
-
+  let subscribeCheck = params.subscribeCheck;
+  req.getValidationResult().then(function(result) {
+    if (!result.isEmpty()) {
+      return res.status(200).json({success: false, errors: "All fields are required"});
+    } else {
+      User.register(
+        params.userFirstName,
+        params.userLastName,
+        params.userEmail,
+        params.userPassword
+      ).then(async function(user) {
+        if (!user) {
+          console.log('@@@@ Register returned null');
+          return res.status(422).json({success: false, errors: "unable to register"});
+        } else if (user.errors) {
+          return res.status(422).json({success: false, errors: user.errors});
+        } else {
+          res.render('emails/activation', {
+            req: req,
+            token: user.emailConfirmationToken,
+            firstName: user.userFirstName
+          }, function(err ,html) {
+            transport.sendMail({
+              from: '8th Mind <postmaster@mg.8thmind.com>',
+              to: user.userEmail,
+              subject: 'Welcome to 8th Mind, '+user.userFirstName+'!',
+              html: html
+            }, function(err){
+              console.log(err);
+            });
+          });
+          if (subscribeCheck) {
+            await user.subscribe();
+          }
+          return res.status(200).json({success: true, data: user.serialized});
+          // }).catch(function (err) {
+          //   return res.status(500).json({success: false, errors: err});
         }
-        else
-        {
-
-        bcrypt.genSalt(10,function(err,salt){
-		   bcrypt.hash(params.userPassword ,salt, function(err,hash)
-		   {
-
-			   db.query("SELECT * FROM users WHERE userEmail = '"+params.userEmail+"'", function (err, user, fields) {
-               if (user.length==1)
-                {
-                   return res.status(200).json({success: false, errors: "A user with that email address already exists"});
-                }
-				else
-				{
-
-                   var emailConfirmationToken = crypto.randomBytes(40).toString('hex');
-                   var emailStatus='Unverified';
-                   var userStatus='Pending';
-                   var createdAt = new Date();
-                   var updatedAt = new Date();
-
-                   var ins_user={
-                    userFirstName:params.userFirstName,
-                    userLastName:params.userLastName,
-                    userEmail:params.userEmail,
-                    userPassword:hash,
-                    emailConfirmationToken:emailConfirmationToken,
-					passwordResetToken:'',
-					userRole:3,
-                    emailStatus:emailStatus,
-                    userStatus:userStatus,
-                    createdAt:createdAt,
-                    updatedAt:updatedAt,
-					lastLogin:createdAt
-                   };
-
-
-
-					db.query('INSERT INTO users SET ?',ins_user, function (err, result) {
-						if (err) throw err;
-					  var user = {
-							userID: result.insertId,
-							userFirstName:params.userFirstName,
-							userLastName:params.userLastName,
-							userEmail: params.userEmail,
-                            userStatus:userStatus,
-                            emailStatus:emailStatus,
-                            userRole:3
-							};
-
-                        // send email activation //
-
-						res.render('emails/activation', {req: req, token: emailConfirmationToken, firstName: user.userFirstName }, function(err ,html){
-
-							transport.sendMail({
-								from: '8th Mind <postmaster@mg.8thmind.com>',
-								to: user.userEmail,
-								subject: 'Welcome to 8th Mind, '+user.userFirstName+'!',
-								html: html
-							}, function(err){
-								console.log(err);
-							});
-						});
-
-                         if(subscribeCheck == 'true')
-                         {
-
-                               db.query("SELECT * FROM subscribers WHERE subscribeEmail = '"+params.userEmail+"'", function (err, suser) {
-                                   if (suser.length==0)
-                                    {
-                                       var ins={
-                                        subscribeEmail:params.userEmail,
-                                        createdAt:createdAt,
-                                       };
-                					 db.query('INSERT INTO subscribers SET ?',ins, function (err, result) { });
-                				   }
-                			   });
-
-                        }
-
-						  res.status(200).json({
-								success: true,
-								data: user,
-							});
-
-					  });
-
-				}
-
-			    });
-
-
-		   });
-		});
-     }
-
-
+      });
+    }
   });
 });
 

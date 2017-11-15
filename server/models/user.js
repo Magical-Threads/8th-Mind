@@ -1,4 +1,7 @@
 let db = require('../db');
+let bcrypt = require('bcryptjs');
+let crypto = require('crypto');
+let transport = require('../mailer');
 
 /**
  * Class for managing users in the system.
@@ -39,6 +42,18 @@ class User {
     return this._errors;
   }
   /**
+   * Return the user in serializable form (all internal fields removed).
+   */
+  get serialized() {
+    let o = {};
+    for (let k of Object.keys(this)) {
+      if (!k.startsWith('_')) {
+        o[k] = this[k];
+      }
+    }
+    return o;
+  }
+  /**
    * Register a new user
    * @param {string} first_name
    * @param {string} last_name
@@ -47,7 +62,54 @@ class User {
    * @return {User} - return null if user already exists
    */
   static async register(first_name, last_name, email, password) {
+    return new Promise((resolve, reject) => {
+      bcrypt.genSalt(10,function(err,salt) {
+        if (err) return reject(err);
+        bcrypt.hash(password ,salt, function(err,hash) {
+          if (err) return reject(err);
+          User.find(email).then(async function(user) {
+            if (user) {
+              resolve(user.add_error("A user with that email address already exists"));
+            } else {
+              let emailConfirmationToken = crypto.randomBytes(40).toString('hex');
+              let emailStatus='Unverified';
+              let userStatus='Pending';
+              let createdAt = new Date();
+              let updatedAt = new Date();
 
+              let ins_user={
+                userFirstName:first_name,
+                userLastName:last_name,
+                userEmail:email,
+                userPassword:hash,
+                emailConfirmationToken:emailConfirmationToken,
+                passwordResetToken:'',
+                userRole:3,
+                emailStatus:emailStatus,
+                userStatus:userStatus,
+                createdAt:createdAt,
+                updatedAt:updatedAt,
+                lastLogin:createdAt
+              };
+
+              db.query('INSERT INTO users SET ?',ins_user, function (err, result) {
+                if (err) return reject(err);
+                let user = new User(result.insertId);
+                user.userID = result.insertId;
+                user.userFirstName = first_name;
+                user.userLastName = last_name;
+                user.userEmail = email;
+                user.userStatus = userStatus;
+                user.emailStatus = emailStatus;
+                user.emailConfirmationToken = emailConfirmationToken;
+                user.userRole = 3;
+                resolve(user);
+              });
+            }
+          });
+        });
+      });
+    });
   }
   /**
    * Log a user into the system
@@ -101,24 +163,15 @@ class User {
         } else if (users.length < 1) {
           resolve(null);
         } else {
-          resolve(new User().setData(users[0], fields));
+          let names = fields.map(f => f.name);
+          let u = new User(users[0].userID);
+          for (let n of names) {
+            u[n] = users[0][n];
+          }
+          resolve(u);
         }
       });
-    })
-  }
-  /**
-   * Load summary data for the user into the user object.
-   * If summary data is already loaded this does nothing.
-   */
-  async loadSummary() {
-
-  }
-  /**
-   * Load detail data for the user into the user object.
-   * If detail data is loaded already this does nothing.
-   */
-  async loadDetails() {
-
+    });
   }
   /**
    * Change the password for the user.
@@ -134,7 +187,16 @@ class User {
    * @return {boolean} - True for succesful subscription
    */
   async subscribe() {
-
+    db.query("SELECT * FROM subscribers WHERE subscribeEmail = '"+params.userEmail+"'", function (err, suser) {
+        if (suser.length==0)
+         {
+            var ins={
+             subscribeEmail:params.userEmail,
+             createdAt:createdAt,
+            };
+db.query('INSERT INTO subscribers SET ?',ins, function (err, result) { });
+}
+});
   }
   /**
    * Add an error to the user object.
@@ -147,6 +209,7 @@ class User {
     } else {
       this._errors = [msg];
     }
+    return this;
   }
 }
 

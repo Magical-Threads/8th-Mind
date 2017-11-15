@@ -4,13 +4,11 @@ let expect = chai.expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-let a = null;
-let s = null;
 before(function() {
   let {app, server} = require('../index.js');
   server = require('http-shutdown')(server);
-  a = app;
-  s = server;
+  global.a = app;
+  global.s = server;
 });
 after(async function() {
   // console.log('@@@@ Terminating server');
