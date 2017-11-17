@@ -23,7 +23,52 @@ describe('Security Routes', function() {
       resolve();
     });
   });
-  it('should allow login to return a token');
+  it('should allow login to return a token', async function() {
+    let u = await User.register(
+      test_user.userFirstName, test_user.userLastName,
+      test_user.userEmail, 'wilma');
+    await User.validate_email(u.emailConfirmationToken);
+    await chai.request(a)
+    .post('/login')
+    .send({
+      username: test_user.userEmail,
+      password: 'wilma'
+    })
+    .then(async (res) => {
+      expect(res).to.exist;
+      expect(res.status).to.equal(200);
+      expect(res.body.success).to.equal(true);
+      expect(res.body.userID).to.equal(u.id);
+      expect(res.body.userFirstName).to.equal(u.userFirstName);
+      expect(res.body.userLastName).to.equal(u.userLastName);
+      expect(res.body.access_token).to.exist;
+    }).catch(async (err) => {
+      console.error('#### Error in test: ',err);
+      throw err;
+    });
+  });
+  it('should reject login with an incorrect password', async function() {
+    let u = await User.register(
+      test_user.userFirstName, test_user.userLastName,
+      test_user.userEmail, 'wilma');
+    await User.validate_email(u.emailConfirmationToken);
+    await chai.request(a)
+    .post('/login')
+    .send({
+      username: test_user.userEmail,
+      password: 'betty'
+    })
+    .then(async (res) => {
+      expect(res).to.exist;
+      expect(res.status).to.equal(401);
+      expect(res.body.success).to.equal(false);
+      expect(res.body.access_token).to.not.exist;
+    }).catch(async (err) => {
+      expect(err.response).to.exist;
+      expect(err.response.status).to.equal(401);
+      expect(err.response.body.success).to.equal(false);
+    });
+  });
   it('should allow registering a new user without a token', function() {
       return chai.request(a)
       .post('/register')
@@ -62,7 +107,9 @@ describe('Security Routes', function() {
       });
   });
   it('should not allow registering a user to the email of an existing user', async function() {
-    let u = await User.register(test_user.userFirstName, test_user.userLastName, test_user.userEmail, 'wilma');
+    let u = await User.register(
+      test_user.userFirstName, test_user.userLastName,
+      test_user.userEmail, 'wilma');
     await chai.request(a)
     .post('/register')
     .send({
@@ -84,7 +131,27 @@ describe('Security Routes', function() {
     })
   });
   it('should allow subscribing for emails without being logged in');
-  it('should allow a user to activate their account from the activation email');
+  it('should allow subscribing for emails during registration');
+  it('should allow a user to activate their account from the activation email', async function() {
+    let u = await User.register(
+      test_user.userFirstName, test_user.userLastName,
+      test_user.userEmail, 'wilma');
+    await chai.request(a)
+    .get('/users/activate')
+    .query({token: u.emailConfirmationToken})
+    .then(async (res) => {
+      expect(res).to.exist;
+      expect(res.status).to.equal(200);
+      expect(res.body.success).to.equal(true);
+      let u2 = await User.find(u.userEmail);
+      expect(u2.id).to.equal(u.id);
+      expect(u2.userStatus).to.equal('Active');
+      expect(u2.emailStatus).to.equal('Verified');
+    }).catch(async (err) => {
+      console.error('#### Error in test: ',err);
+      throw err;
+    });
+  });
   it('should not activate a user with the wrong token');
 });
 

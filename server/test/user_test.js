@@ -11,7 +11,11 @@ describe('Users', function() {
       let u = new User(10);
       expect(u.id).to.eq(10);
     });
-    it('should be able to return a token from prior security operations');
+    it('should be able to return a token from prior security operations', function() {
+      let u = new User(100);
+      u._token = 'ABCDEFG';
+      expect(u.token).to.equal('ABCDEFG');
+    });
     it('should be able to return errors for the user', function() {
       let u = new User(100);
       u.add_error('TESTING');

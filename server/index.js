@@ -2,13 +2,8 @@ let express = require('express');
 let logger = require('morgan');
 let bodyParser = require('body-parser');
 let cors = require('cors');
-let jwt = require('jsonwebtoken');
-let db = require('./db');
 let expressValidator = require('express-validator');
-let bcrypt = require('bcryptjs');
-let crypto = require('crypto');
 let path = require('path');
-let transport = require('./mailer');
 
 let app = express();
 let port = process.env.NODE_ENV == 'test' ? '3001' : '3000';

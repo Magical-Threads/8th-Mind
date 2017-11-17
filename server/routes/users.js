@@ -5,6 +5,7 @@ var h = require('../helpers');
 var db = require('../db');
 var crypto = require('crypto');
 var transport = require('../mailer');
+let User = require('../models/user');
 
 router.post('/users/change-password/',h.ensureLogin, function(req, res, next) {
   var params = req.body;
@@ -41,35 +42,24 @@ router.post('/users/change-password/',h.ensureLogin, function(req, res, next) {
   });
 });
 
-router.get('/users/activate/', function(req, res, next){
+router.get('/users/activate/', function(req, res, next) {
     var token = req.query.token;
-    if(!token)
-    {
-         res.status(200).json({
-                                success: false,
-                                error:' Token is Missing'
-                             });
+    if (!token) {
+      res.status(200).json({
+        success: false,
+        errors:'Token is Missing.'
+      });
+    } else {
+      User.validate_email(token).then((u) => {
+        if (!u) {
+          return res.status(200).json({success: false, errors: "Token is expired."});
+        } else {
+          res.status(200).json({
+            success: true
+          });
+        }
+      });
     }
-    else
-    {
-        db.query("SELECT * FROM users WHERE emailConfirmationToken = '"+token+"'", function (err, user, fields) {
-                  if (user.length==0)
-                    {
-                       return res.status(200).json({success: false, errors: "Token is expired."});
-                    }
-                    var userID=user[0].userID;
-
-
-                     var sql = "UPDATE users set emailStatus =? , userStatus =? , emailConfirmationToken=?  WHERE userID = ?";
-                     db.query(sql,["Verified", "Active","", userID], function (err, user) {
-                                         res.status(200).json({
-                                            success: true,
-                                            error:false
-                                         });
-                              });
-              });
-    }
-
 });
 
 router.post('/users/forget-password/', function(req, res, next){

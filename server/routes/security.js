@@ -17,20 +17,21 @@ router.post('/login', function(req, res, next){
   let params = req.body;
   let email = params.username;
   let password = params.password;
-  let user = User.login(email, password);
-  if (user == null) {
-    return res.status(422).json({success: false, errors: "No user exist with this Email: "+params.username});
-  } else if (user.errors) {
-    return res.status(422).json({success: false, errors: user.errors});
-  } else {
-    res.status(200).json({
-      success: true,
-      access_token: user.token,
-      userID: user.id,
-      userFirstName: user.userFirstName,
-      userLastName: user.userLastName
-    });
-  }
+  User.login(email, password).then(async function(user) {
+    if (user == null) {
+      return res.status(401).json({success: false});
+    } else if (user.errors) {
+      return res.status(401).json({success: false});
+    } else {
+      res.status(200).json({
+        success: true,
+        access_token: user.token,
+        userID: user.id,
+        userFirstName: user.userFirstName,
+        userLastName: user.userLastName
+      });
+    }
+  });
 });
 
 

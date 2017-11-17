@@ -2,6 +2,7 @@ let db = require('../db');
 let bcrypt = require('bcryptjs');
 let crypto = require('crypto');
 let transport = require('../mailer');
+let jwt = require('jsonwebtoken');
 
 /**
  * Class for managing users in the system.
@@ -138,9 +139,9 @@ class User {
               userEmail: user.userEmail
             };
             let token = jwt.sign(user_tok, 'secret');
-            user = user._token = token;
-            let sql = "UPDATE users set lastLogin=? WHERE userID = ?";
-            db.query(sql,[lastLogin,userID], function (err, user) {});
+            let sql = "UPDATE users set lastLogin = ? WHERE userID = ?";
+            db.query(sql,[user.lastLogin,user.id], function (err, user) {});
+            user._token = token;
             resolve(user);
           }
         } else {
@@ -169,6 +170,31 @@ class User {
             u[n] = users[0][n];
           }
           resolve(u);
+        }
+      });
+    });
+  }
+  /**
+   * Validate the email of a user.
+   * @param {string} token
+   * @return {User} - The user validated, or null for none found
+   */
+  static async validate_email(token) {
+    return new Promise((resolve, reject) => {
+      db.query("SELECT * FROM users WHERE emailConfirmationToken = ?", token, function (err, user, fields) {
+        if (user.length == 0) {
+          resolve(null);
+        } else {
+          var userID = user[0].userID;
+          var sql = 'UPDATE users set emailStatus = ? , '+
+            'userStatus = ? , emailConfirmationToken = ?  WHERE userID = ?';
+          db.query(sql,["Verified", "Active","", userID], function (err, user) {
+            if (err) {
+              console.error('#### Error in update user: ',err);
+              return reject(err);
+            }
+            resolve(user);
+          });
         }
       });
     });
