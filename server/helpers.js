@@ -64,7 +64,7 @@ exports.ensureLogin = function(req, res, next){
     if (newtok) {
         jwt.verify(newtok, 'secret', function(err, decoded) {
             if (err) {
-                return res.status(200).json({success:false,error: 'Failed to authenticate token.',authErr:true});
+                return res.status(401).json({success:false,error: 'Failed to authenticate token.',authErr:true});
             } else {
                 req.user = decoded;
                 next();
@@ -72,7 +72,7 @@ exports.ensureLogin = function(req, res, next){
         });
 
     } else {
-        return res.status(200).json({success:false,error: 'Failed to authenticate token.',authErr:true});
+        return res.status(401).json({success:false,error: 'Failed to authenticate token.',authErr:true});
 
     }
 };

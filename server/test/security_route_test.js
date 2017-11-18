@@ -18,9 +18,9 @@ describe('Security Routes', function() {
     return new Promise((resolve, reject) => {
       db.query("DELETE FROM users WHERE userEmail = ?", test_user.userEmail,
         (err, users, fields) => {
-          expect(err).to.not.exist;
-        })
-      resolve();
+        expect(err).to.not.exist;
+        resolve();
+      });
     });
   });
   it('should allow login to return a token', async function() {
@@ -69,7 +69,7 @@ describe('Security Routes', function() {
       expect(err.response.body.success).to.equal(false);
     });
   });
-  it('should allow registering a new user without a token', function() {
+  it('should allow registering a new user without a token', async function() {
       return chai.request(a)
       .post('/register')
       .send({

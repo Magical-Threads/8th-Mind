@@ -3,27 +3,20 @@ let bcrypt = require('bcryptjs');
 let crypto = require('crypto');
 let transport = require('../mailer');
 let jwt = require('jsonwebtoken');
+let Base = require('./base');
 
 /**
  * Class for managing users in the system.
  */
-class User {
+class User extends Base {
   /**
    * Create user objects by prividing the user id.
    * @param {int} id - The id of the user
    * @return {User}
    */
   constructor(id) {
-    this._id = id;
-    this._errors = null;
+    super(id);
     this._token = null;
-  }
-  /**
-   * Return the id of the user.
-   * @return {int} - The database id for the user
-   */
-  get id() {
-    return this._id;
   }
 
   /**
@@ -32,27 +25,6 @@ class User {
    */
   get token() {
     return this._token;
-  }
-  /**
-   * Return any errors associated with the user object.  Errors result from methods
-   * that can return a user, but may not be able to do so given the inputs provided.
-   * In these cases a User with errors is returned.
-   * @return {string[]} - errors
-   */
-  get errors() {
-    return this._errors;
-  }
-  /**
-   * Return the user in serializable form (all internal fields removed).
-   */
-  get serialized() {
-    let o = {};
-    for (let k of Object.keys(this)) {
-      if (!k.startsWith('_')) {
-        o[k] = this[k];
-      }
-    }
-    return o;
   }
   /**
    * Register a new user
@@ -170,6 +142,27 @@ class User {
             u[n] = users[0][n];
           }
           resolve(u);
+        }
+      });
+    });
+  }
+  /**
+   * Load data from db for this user.
+   */
+  async load() {
+    return new Promise((resolve, reject) => {
+      db.query("SELECT * FROM users WHERE userID = ?", this.id,
+        (err, users, fields) => {
+        if (err) {
+          reject(err);
+        } else if (users.length < 1) {
+          resolve(null);
+        } else {
+          let names = fields.map(f => f.name);
+          for (let n of names) {
+            this[n] = users[0][n];
+          }
+          resolve(this);
         }
       });
     });

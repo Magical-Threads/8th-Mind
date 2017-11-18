@@ -6,10 +6,12 @@ var http = require('http');
 var fs = require('fs-extra');
 var formidable = require('formidable');
 var path = require('path');
+let Article = require('../models/article');
+let User = require('../models/user');
+let Submission = require('../models/submission');
 
 // configuration (should move to ENV or config file)
 var storageDir = '/var/www/html/storage/submission/photo/';
-
 
 /**
  * Primary articles index for home page
@@ -18,11 +20,11 @@ var storageDir = '/var/www/html/storage/submission/photo/';
  * @param {int} page - which page of content to show
  */
 router.get('/articles', function(req, res){
-	var page = req.query.page;
-	var per_page = req.query.per_page;
-	var tag = req.query.tag;
-	if(!page){ page=1; }
-	if(!per_page){ per_page=10; }
+	let page = req.query.page;
+	let per_page = req.query.per_page;
+	let tag = req.query.tag;
+	if (!page) { page = 1; }
+	if (!per_page) { per_page = 10; }
 
 	var offset = (page - 1) * per_page;
 	var pagination=[];
@@ -31,39 +33,39 @@ router.get('/articles', function(req, res){
 
 	// console.error("@@@@@@ tag: ",tag," phrase: ",tag_phrase);
 
-	db.query("	SELECT count(*) as total" +
+	// todo: determine if we still need a left join here (will there ever be orphan articles with no userID?) -RJD
+	query = "	SELECT articles.articleID, articles.articleTitle, "+
+		"articles.articleDescription, articles.articleAllowSubmission, " +
+		"		 articles.articleImage, articles.articleTags, users.userFirstName, "+
+		"users.userLastName," +
+		"		 articles.articleStartDate " +
 		"		FROM articles " +
-		"		WHERE articles.articleStatus='Active'"+tag_phrase, function (err, all) {
+		"		LEFT JOIN users on articles.userID=users.userID " +
+		"		WHERE articles.articleStatus='Active' " +
+		tag_phrase +
+		"		ORDER BY articleStartDate DESC " +
+		"		LIMIT "+offset+","+per_page;
 
-		// todo: determine if we still need a left join here (will there ever be orphan articles with no userID?) -RJD
+	// console.log("@@@@ query string: '"+query+"'")
 
-		query = "	SELECT articles.articleID, articles.articleTitle, articles.articleDescription," +
-			"		 articles.articleImage, articles.articleTags, users.userFirstName, users.userLastName," +
-			"		 articles.articleStartDate " +
-			"		FROM articles " +
-			"		LEFT JOIN users on articles.userID=users.userID " +
-			"		WHERE articles.articleStatus='Active' " +
-			tag_phrase +
-			"		ORDER BY articleStartDate DESC " +
-			"		LIMIT "+offset+","+per_page;
+	db.query(query, function (err, result) {
+		if (err) {
+			console.error("#### Error in getting list of articles: ",err);
+			res.status(500).json({error: err});
+		} else {
+			Article.count(tag).then((total) => {
+				let total_pages = total / per_page;
 
-			// console.log("@@@@ query string: '"+query+"'")
+				pagination[0] = {
+					'page': page,
+					'per_page': per_page,
+					'total_pages': total_pages,
+					'total': total
+				};
 
-			db.query(query, function (err, result) {
-
-			var total = (all && all.length > 0) ? all[0]['total'] : 0;
-			var total_pages = (all && all.length > 0) ? Math.ceil(all[0]['total'] /per_page) : 0;
-
-			pagination[0] = {
-				'page': page,
-				'per_page': per_page,
-				'total_pages': total_pages,
-				'total': total
-			};
-
-			res.status(200).json({result,pagination});
-
-		});
+				res.status(200).json({result,pagination});
+			});
+		};
 	});
 });
 
@@ -500,7 +502,7 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 	var userID = req.user.userID;
 	var articleID = req.params.id;
 
-	console.log('@@@@ Create new submission: ',userID,' article ',articleID,' body: ',req.body);
+	// console.log('@@@@ Create new submission: ',userID,' article ',articleID,' body: ',req.body);
 
 	// form processing
 	const dateTime = Date.now();
@@ -508,37 +510,22 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 	var filenames = timestamp.toString();
 	var createdAt = new Date();
 
-	// first validate the data
-	db.query("	SELECT A.articleID, A.articleAllowSubmission, S.articleSubmissionID," +
-		"		 (SELECT userID from users WHERE userID = '" + userID + "' LIMIT 1) AS `userID`" +
-		"		FROM articles A" +
-		"		LEFT JOIN article_submission S" +
-		"		 ON (A.articleID = S.articleID and S.userID = '" + userID + "')" +
-		"		WHERE A.articleID = '" + articleID + "' " +
-		"		LIMIT 1", function(err, check) {
+	(new Article(articleID)).load().then(async (article) => {
+		let user = await (new User(userID)).load();
+		let submission = await article.submission_for_user(user);
 
-		// error handling
-		if(err || !Array.isArray(check)) {
-			console.error(err.stack);
-			res.status(200).json({
-				success: false,
-				errors: "Error while querying database."
-			});
-		}
-
-		// no articleID found
-		else if(check.length == 0) {
-			res.status(200).json({
+		// no article found
+		if (!article) {
+			res.status(404).json({
 				success: false,
 				errorCode: 1,
 				errors: "The provided articleID ("+articleID+") is invalid."
 			});
-
 		}
 
 		// allowArticleSubmission is something other than 'Yes'
-		else if(check[0].articleAllowSubmission !== 'Yes') {
-			res.status(200).json({
+		else if (article.articleAllowSubmission !== 'Yes') {
+			res.status(422).json({
 				success: false,
 				errorCode: 2,
 				errors: "The provided articleID does not allow user submissions."
@@ -546,8 +533,8 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 		}
 
 		// no valid userID found in users table
-		else if(check[0].userID === null) {
-			res.status(200).json({
+		else if (!user) {
+			res.status(422).json({
 				success: false,
 				errorCode: 3,
 				errors: "The provided userID ("+userID+") is invalid.  req.user = "+ JSON.stringify(req.user)
@@ -555,82 +542,44 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 		}
 
 		// found existing articleSubmission
-		else if(check[0].articleSubmissionID !== null) {
-			res.status(200).json({
+		else if (submission) {
+			res.status(422).json({
 				success: false,
 				errorCode: 4,
-				errors: "This userID ("+userID+") has already made an articleSubmissionID ("+check[0].articleSubmissionID+") to this articleID ("+articleID+")."
+				errors: "This userID ("+userID+") has already made an articleSubmissionID ("+submission.articleSubmissionID+") to this articleID ("+articleID+")."
 			});
 		}
 
 		else {
+			// build record to be inserted
+			let submission = (new Submission(-1)).set({
+				articleID: articleID,
+				userID: userID,
+				// title: (fields['submissionTitle']) ? fields['submissionTitle'] : '',
+				submissionTitle: (req.body['submissionTitle']) ? req.body['submissionTitle'] : '',
+				// status: "Draft"
+				submissionContent: '',
+				createdAt: createdAt
+			});
 
-			// // parse form
-			// var form = new formidable.IncomingForm();
-			// form.multiples = false;
-      //
-			// form.parse(req, function (err, fields, files) {
-      //
-			// 	if(err) {
-			// 		console.error(err.stack);
-			// 		res.status(200).json({
-			// 			success: false,
-			// 			errors: "Error while parsing user form."
-			// 		});
-			// 	}
-      //
-			// 	else {
-			// 		console.log('@@@@ Parsed fields from form: ',fields);
+			// ensure minimum title length
+			if(submission.submissionTitle.length < 3) {
+				res.status(422).json({
+					success: false,
+					errors: "The submission title ("+submission.title+") must be at least 3 characters long."
+				});
+			}
 
-					// build record to be inserted
-					var submission = {
-						articleID: articleID,
-						userID: userID,
-						// title: (fields['submissionTitle']) ? fields['submissionTitle'] : '',
-						title: (req.body['submissionTitle']) ? req.body['submissionTitle'] : '',
-						status: "Draft"
-					};
-
-					// ensure minimum title length
-					if(submission.title.length < 3) {
-						res.status(200).json({
-							success: false,
-							errors: "The submission title ("+submission.title+") must be at least 3 characters long."
-						});
-					}
-
-					else {
-
-						// add to DB
-						db.query("INSERT INTO article_submission SET ?", submission, function (err, result) {
-
-							if(err) {
-								console.error(err.stack);
-								res.status(200).json({
-									success:false,
-									errors: "Error while inserting new record."
-								});
-							}
-
-							else {
-
-								res.status(200).json({
-									success: true,
-									data: submission,
-									insertId: result.insertId
-								});
-							}
-						});
-
-					}
-				// }
-
-			// }); // end form.parse
-
-		} // end big 'else'
-
-	}); // end validation query
-
+			else {
+				await submission.create();
+				res.status(200).json({
+					success: true,
+					data: submission,
+					insertId: submission.id
+				});
+			}
+		}
+	});
 });
 
 
