@@ -3,27 +3,17 @@ let chai = require('chai');
 let expect = chai.expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
+let support = require('./support');
 
 let db = require('../db');
 let User = require('../models/user');
 
-let test_user = {
-  userFirstName: 'Fred',
-  userLastName: 'Flintstone',
-  userEmail: 'fred@bedrock.net'
-};
-
 describe('Security Routes', function() {
   beforeEach(async function() {
-    return new Promise((resolve, reject) => {
-      db.query("DELETE FROM users WHERE userEmail = ?", test_user.userEmail,
-        (err, users, fields) => {
-        expect(err).to.not.exist;
-        resolve();
-      });
-    });
+    await support.clear_users();
   });
   it('should allow login to return a token', async function() {
+    let test_user = support.test_users.fred;
     let u = await User.register(
       test_user.userFirstName, test_user.userLastName,
       test_user.userEmail, 'wilma');
@@ -48,6 +38,7 @@ describe('Security Routes', function() {
     });
   });
   it('should reject login with an incorrect password', async function() {
+    let test_user = support.test_users.fred;
     let u = await User.register(
       test_user.userFirstName, test_user.userLastName,
       test_user.userEmail, 'wilma');
@@ -70,43 +61,45 @@ describe('Security Routes', function() {
     });
   });
   it('should allow registering a new user without a token', async function() {
-      return chai.request(a)
-      .post('/register')
-      .send({
-        userFirstName: test_user.userFirstName,
-        userLastName: test_user.userLastName,
-        userEmail: test_user.userEmail,
-        userPassword: 'wilma'
-      })
-      .then(async (res) => {
-        // console.log('@@@@ Verifying end conditions');
-        expect(res).to.exist
-        let emailStatus='Unverified';
-        let userStatus='Pending';
-        expect(res.body.success).to.equal(true);
-        expect(res.body.data.userID).to.exist;
-        expect(res.body.data.emailConfirmationToken).to.exist;
-        expect(res.body).to.deep.equal({
-          success: true,
-          data: {
-            userID: res.body.data.userID,
-            emailConfirmationToken: res.body.data.emailConfirmationToken,
-            userFirstName: 'Fred',
-            userLastName: 'Flintstone',
-            userEmail: 'fred@bedrock.net',
-            userStatus:userStatus,
-            emailStatus:emailStatus,
-            userRole:3
-          }
-        });
-        let user = await User.find(test_user.userEmail);
-        expect(user).to.exist;
-        expect(user.userFirstName).to.equal(test_user.userFirstName);
-        expect(user.userLastName).to.equal(test_user.userLastName);
-        expect(user.userEmail).to.equal(test_user.userEmail);
+    let test_user = support.test_users.fred;
+    return chai.request(a)
+    .post('/register')
+    .send({
+      userFirstName: test_user.userFirstName,
+      userLastName: test_user.userLastName,
+      userEmail: test_user.userEmail,
+      userPassword: 'wilma'
+    })
+    .then(async (res) => {
+      // console.log('@@@@ Verifying end conditions');
+      expect(res).to.exist
+      let emailStatus='Unverified';
+      let userStatus='Pending';
+      expect(res.body.success).to.equal(true);
+      expect(res.body.data.userID).to.exist;
+      expect(res.body.data.emailConfirmationToken).to.exist;
+      expect(res.body).to.deep.equal({
+        success: true,
+        data: {
+          userID: res.body.data.userID,
+          emailConfirmationToken: res.body.data.emailConfirmationToken,
+          userFirstName: 'Fred',
+          userLastName: 'Flintstone',
+          userEmail: 'fred@bedrock.net',
+          userStatus:userStatus,
+          emailStatus:emailStatus,
+          userRole:3
+        }
       });
+      let user = await User.find(test_user.userEmail);
+      expect(user).to.exist;
+      expect(user.userFirstName).to.equal(test_user.userFirstName);
+      expect(user.userLastName).to.equal(test_user.userLastName);
+      expect(user.userEmail).to.equal(test_user.userEmail);
+    });
   });
   it('should not allow registering a user to the email of an existing user', async function() {
+    let test_user = support.test_users.fred;
     let u = await User.register(
       test_user.userFirstName, test_user.userLastName,
       test_user.userEmail, 'wilma');
@@ -133,6 +126,7 @@ describe('Security Routes', function() {
   it('should allow subscribing for emails without being logged in');
   it('should allow subscribing for emails during registration');
   it('should allow a user to activate their account from the activation email', async function() {
+    let test_user = support.test_users.fred;
     let u = await User.register(
       test_user.userFirstName, test_user.userLastName,
       test_user.userEmail, 'wilma');

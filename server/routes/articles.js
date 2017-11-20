@@ -340,10 +340,14 @@ router.delete('/articles/:article/submissions/:id/', h.ensureLogin, function(req
 
 	// validate the request data, checking articleID and userID verbosely to prevent unwanted deletes
 	(new Submission(subID)).load().then(async (submission) => {
-		if (!submission ||
-			submission.articleID != articleID ||
+		if (!submission) {
+			return res.status(404).json({
+				success: false,
+				errors: "Invalid articleSubmissionID ("+subID+") or user ("+userID+") does not have permission to delete"
+			});
+		} else if (submission.articleID != articleID ||
 			submission.userID != userID) {
-			return res.status(422).json({
+			return res.status(403).json({
 				success: false,
 				errors: "Invalid articleSubmissionID ("+subID+") or user ("+userID+") does not have permission to delete"
 			});
@@ -355,7 +359,7 @@ router.delete('/articles/:article/submissions/:id/', h.ensureLogin, function(req
 				res.status(204).end();
 			} else {
 				let count = assets.length;
-				res.status(422).json({
+				res.status(409).json({
 					success: false,
 					errors: "Can't delete submission (" + subID + ") due to associated assets (" + count + ")"
 				});

@@ -3,6 +3,7 @@ let chai = require('chai');
 let expect = chai.expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
+let support = require('./support');
 
 let db = require('../db');
 let Article = require('../models/article');
@@ -10,40 +11,14 @@ let User = require('../models/user');
 let Submission = require('../models/submission');
 let Asset = require('../models/asset');
 
-let test_user = {
-  userFirstName: 'Fred',
-  userLastName: 'Flintstone',
-  userEmail: 'fred@bedrock.net'
-};
-
 describe('article routes', function() {
   before(async function() {
-    await new Promise((resolve, reject) => {
-      db.query("DELETE FROM users WHERE userEmail = ?", test_user.userEmail,
-        (err, users, fields) => {
-        expect(err).to.not.exist;
-        resolve();
-      });
-    });
-    let u = await User.register(test_user.userFirstName, test_user.userLastName,
-      test_user.userEmail, 'wilma');
-    await User.validate_email(u.emailConfirmationToken);
+    await support.clear_users();
+    await support.register_users();
   });
   beforeEach(async function() {
-    await new Promise((resolve, reject) => {
-      db.query("DELETE FROM article_submission WHERE title = 'TESTING'",
-        (err, results) => {
-        expect(err).to.not.exist;
-        resolve();
-      });
-    });
-    await new Promise((resolve, reject) => {
-      db.query("DELETE FROM article_submission_asset WHERE caption = 'TESTING'",
-        (err, results) => {
-        expect(err).to.not.exist;
-        resolve();
-      });
-    });
+    await support.clear_submissions();
+    await support.clear_assets();
   });
   describe('basic access', function() {
     it('should allow an article to be created');
@@ -101,7 +76,7 @@ describe('article routes', function() {
     it('should allow submissions to be created for an article, if such is enabled', async function() {
       let article = await (new Article(53)).load();
       await article.enable_submissions();
-      let u = await User.login(test_user.userEmail, 'wilma');
+      let u = await User.login(support.test_users.fred.userEmail, 'wilma');
       await chai.request(a)
       .post('/articles/53/submissions/new')
       .set('authorization', u.token)
@@ -116,7 +91,7 @@ describe('article routes', function() {
     it('should not allow submissions to be created for an article, if such is disabled', async function() {
       let article = await (new Article(53)).load();
       await article.disable_submissions();
-      let u = await User.login(test_user.userEmail, 'wilma');
+      let u = await User.login(support.test_users.fred.userEmail, 'wilma');
       await chai.request(a)
       .post('/articles/53/submissions/new')
       .set('authorization', u.token)
@@ -144,7 +119,7 @@ describe('article routes', function() {
       })
     });
     it('should not allow submissions to be created for an article, if user already has a submission', async function() {
-      let u = await User.login(test_user.userEmail, 'wilma');
+      let u = await User.login(support.test_users.fred.userEmail, 'wilma');
       let article = await (new Article(53)).load();
       await article.enable_submissions();
       let sub = new Submission(-1);
@@ -166,7 +141,7 @@ describe('article routes', function() {
       })
     });
     it('should be able to return a list of submissions for an article', async function() {
-      let u = await User.login(test_user.userEmail, 'wilma');
+      let u = await User.login(support.test_users.fred.userEmail, 'wilma');
       let article = await (new Article(53)).load();
       await article.enable_submissions();
       let sub = new Submission(-1);
@@ -194,7 +169,7 @@ describe('article routes', function() {
     it('should be able to list submissions for a specific user for a specific article');
     it('should be able to return details of a submission for an article');
     it('should be able to delete a submission from the user that created it', async function() {
-      let u = await User.login(test_user.userEmail, 'wilma');
+      let u = await User.login(support.test_users.fred.userEmail, 'wilma');
       let article = await (new Article(53)).load();
       await article.enable_submissions();
       let sub = new Submission(-1);
@@ -211,10 +186,33 @@ describe('article routes', function() {
         expect(res.body).to.deep.equal({});
       });
     });
-    it('should not be able to delete a submission from another user');
+    it('should not be able to delete a submission from another user', async function() {
+      let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+      let u2 = await User.login(support.test_users.bambam.userEmail, 'wilma');
+      let article = await (new Article(53)).load();
+      await article.enable_submissions();
+      let sub = new Submission(-1);
+      sub.set({
+        title: 'TESTING',
+        articleID: article.id, userID: u2.id})
+      sub = await sub.create();
+      await chai.request(a)
+      .delete('/articles/53/submissions/'+sub.id)
+      .set('authorization', u.token)
+      .then(async (res) => {
+        expect(res.status).to.equal(403);
+      })
+      .catch(async (err) => {
+        expect(err).to.exist;
+        expect(err.response).to.exist;
+        expect(err.response.status).to.equal(403);
+      });
+      // verify delete failed
+      expect(await sub.load()).to.exist;
+    });
     it('should not be able to delete a submission without being logged in');
     it('should not be able to delete a submission if it has assets', async function() {
-      let u = await User.login(test_user.userEmail, 'wilma');
+      let u = await User.login(support.test_users.fred.userEmail, 'wilma');
       let article = await (new Article(53)).load();
       await article.enable_submissions();
       let sub = new Submission(-1);
@@ -226,7 +224,6 @@ describe('article routes', function() {
       asset.set({
         articleSubmissionID: sub.id,
         caption: 'TESTING',
-        // assetType: '',
         assetPath: ''
       });
       asset = await asset.create();
@@ -235,11 +232,11 @@ describe('article routes', function() {
       .set('authorization', u.token)
       .catch(async (res) => {
         expect(res).to.exist;
-        expect(res.status).to.equal(422);
+        expect(res.status).to.equal(409);
       });
     });
     it('should be able to delete a submission with assets if force option enabled', async function() {
-      let u = await User.login(test_user.userEmail, 'wilma');
+      let u = await User.login(support.test_users.fred.userEmail, 'wilma');
       let article = await (new Article(53)).load();
       await article.enable_submissions();
       let sub = new Submission(-1);
@@ -251,7 +248,6 @@ describe('article routes', function() {
       asset.set({
         articleSubmissionID: sub.id,
         caption: 'TESTING',
-        // assetType: '',
         assetPath: ''
       });
       asset = await asset.create();

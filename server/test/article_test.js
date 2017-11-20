@@ -3,45 +3,20 @@ let chai = require('chai');
 let expect = chai.expect;
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
+let support = require('./support');
 
 let db = require('../db');
 let Article = require('../models/article');
 let User = require('../models/user');
 
-let test_user = {
-  userFirstName: 'Fred',
-  userLastName: 'Flintstone',
-  userEmail: 'fred@bedrock.net'
-};
-
 describe('Article', function() {
   before(async function() {
-    await new Promise((resolve, reject) => {
-      db.query("DELETE FROM users WHERE userEmail = ?", test_user.userEmail,
-        (err, users, fields) => {
-        expect(err).to.not.exist;
-        resolve();
-      });
-    });
-    let u = await User.register(test_user.userFirstName, test_user.userLastName,
-      test_user.userEmail, 'wilma');
-    await User.validate_email(u.emailConfirmationToken);
+    await support.clear_users();
+    await support.register_users();
   });
   beforeEach(async function() {
-    await new Promise((resolve, reject) => {
-      db.query("DELETE FROM article_submission WHERE title = 'TESTING'",
-        (err, results) => {
-        expect(err).to.not.exist;
-        resolve();
-      });
-    });
-    await new Promise((resolve, reject) => {
-      db.query("DELETE FROM article_submission_asset WHERE caption = 'TESTING'",
-        (err, results) => {
-        expect(err).to.not.exist;
-        resolve();
-      });
-    });
+    await support.clear_submissions();
+    await support.clear_assets();
   });
   describe('basic access', function() {
     it('can return a count for all articles', async function() {

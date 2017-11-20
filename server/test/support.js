@@ -1,0 +1,65 @@
+let mocha = require('mocha');
+let chai = require('chai');
+let expect = chai.expect;
+let chaiHttp = require('chai-http');
+chai.use(chaiHttp);
+let db = require('../db');
+let User = require('../models/user');
+
+let test_users = {
+  fred: {
+    userFirstName: 'Fred',
+    userLastName: 'Flintstone',
+    userEmail: 'fred@bedrock.net'
+  },
+  bambam: {
+    userFirstName: 'Bambam',
+    userLastName: 'Flintstone',
+    userEmail: 'bb@bedrock.net'
+  }
+}
+async function clear_users() {
+  await new Promise((resolve, reject) => {
+    let users = Object.values(test_users);
+    let placeholders = users.map(u => '?').join(',');
+    db.query("DELETE FROM users WHERE userEmail in ("+placeholders+")",
+      users.map(u => u.userEmail),
+      (err, users, fields) => {
+      expect(err).to.not.exist;
+      resolve();
+    });
+  });
+}
+async function register_users() {
+  for (let test_user of Object.values(test_users)) {
+    let u = await User.register(test_user.userFirstName, test_user.userLastName,
+      test_user.userEmail, 'wilma');
+    await User.validate_email(u.emailConfirmationToken);
+  }
+}
+async function clear_submissions() {
+  await new Promise((resolve, reject) => {
+    db.query("DELETE FROM article_submission WHERE title = 'TESTING'",
+      (err, results) => {
+      expect(err).to.not.exist;
+      resolve();
+    });
+  });
+}
+async function clear_assets() {
+  await new Promise((resolve, reject) => {
+    db.query("DELETE FROM article_submission_asset WHERE caption = 'TESTING'",
+      (err, results) => {
+      expect(err).to.not.exist;
+      resolve();
+    });
+  });
+}
+
+module.exports = {
+  clear_users,
+  clear_submissions,
+  clear_assets,
+  register_users,
+  test_users
+}
