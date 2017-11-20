@@ -6,7 +6,9 @@ chai.use(chaiHttp);
 
 let db = require('../db');
 let Article = require('../models/article');
+let Submission = require('../models/submission');
 let User = require('../models/user');
+let Asset = require('../models/asset');
 
 let test_user = {
   userFirstName: 'Fred',
@@ -14,7 +16,7 @@ let test_user = {
   userEmail: 'fred@bedrock.net'
 };
 
-describe('Article', function() {
+describe('Submission', function() {
   before(async function() {
     await new Promise((resolve, reject) => {
       db.query("DELETE FROM users WHERE userEmail = ?", test_user.userEmail,
@@ -43,24 +45,22 @@ describe('Article', function() {
       });
     });
   });
-  describe('basic access', function() {
-    it('can return a count for all articles', async function() {
-      // The below assumes the current test data, new test data will require changes
-      expect(await Article.count()).to.equal(33);
-    });
-    it('can return a count for articles with a tag', async function() {
-      // The below assumes the current test data, new test data will require changes
-      expect(await Article.count('test')).to.equal(0);
-      expect(await Article.count('Article')).to.equal(16);
-      expect(await Article.count('Articles')).to.equal(1);
-      expect(await Article.count('Challenge')).to.equal(1);
-      expect(await Article.count('Create')).to.equal(15);
-    });
-    it('can return the list of all tags in use', async function() {
-      // The below assumes the current test data, new test data will require changes
-      expect(await Article.all_tags()).to.deep.equal([
-        'Article', 'Articles', 'Challenge', 'Create'
-      ]);
-    });
+  it('should be able to create assets for a submission', async function() {
+    let u = await User.login(test_user.userEmail, 'wilma');
+    let article = await (new Article(53)).load();
+    await article.enable_submissions();
+    let sub = new Submission(-1);
+    sub.set({
+      title: 'TESTING',
+      articleID: article.id, userID: u.id})
+    sub = await sub.create();
+    let asset = new Asset(-1);
+    asset.set({
+      articleSubmissionID: sub.id,
+      caption: 'TESTING',
+      // assetType: '',
+      assetPath: ''
+    })
   });
-})
+  it('should be able to delete assets from a submission');
+});

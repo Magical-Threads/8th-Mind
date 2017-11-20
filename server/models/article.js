@@ -81,7 +81,7 @@ class Article extends Base {
   async submission_for_user(user) {
     return new Promise((resolve, reject) => {
       db.query("	SELECT *" +
-        "		FROM article_submissions submissions "+
+        "		FROM article_submission submissions "+
         "   WHERE submissions.articleID = ? and submissions.userID = ?" +
         "		LIMIT 1", [this.id, user.id], (err, subs) => {
         if (err) {
@@ -123,6 +123,53 @@ class Article extends Base {
           }
         })
     })
+  }
+  /**
+   * return the list of submissions for this article, and the votes from all users
+   * up and down, and the up/down vote for the provided user.
+   * @param {User} user - the user to report on specific voting status
+   * @return {Submission[]} - The submissions for this article
+   */
+  async submissions_viewing_user(user) {
+    return new Promise((resolve, reject) => {
+      var sql = "SELECT S.articleSubmissionID, S.articleID, "+
+        "S.userID, S.title, S.thumbUrl, S.createdAt, " +
+        "IF(U.displayName IS NULL, " +
+          " CONCAT(U.userFirstName, ' ', U.userLastName)," +
+          " U.displayName) as `userDisplayName`, " +
+        "(SELECT count(articleSubmissionResponseID)" +
+          "FROM article_submission_response " +
+          "WHERE articleSubmissionID = S.articleSubmissionID " +
+          " and responseType = 'Upvote') AS `upvotes`, " +
+        "(SELECT count(articleSubmissionResponseID) " +
+          "FROM article_submission_response " +
+          "WHERE articleSubmissionID = S.articleSubmissionID " +
+          " and responseType = 'Downvote') AS `downvotes`, " +
+  			"IF(R.articleSubmissionResponseID IS NULL,'false','true') as `userLiked`" +
+  		  "FROM article_submission AS `S` " +
+  		  "INNER JOIN users AS `U`" +
+  		    "ON S.userID = U.userID " +
+  			"LEFT JOIN article_submission_response AS `R` " +
+  				"ON (S.articleSubmissionID = R.articleSubmissionID "+
+            "AND R.userID = '"+user.id+"')" +
+  				"WHERE S.articleID = '" + this.id + "' " +
+  		  "ORDER BY createdAt";
+      db.query(sql, (err, subs) => {
+        if (err) {
+          console.log('#### Error in querying database: ',err);
+          reject(err);
+        } else {
+          let result = subs.map((s) => {
+            let sub = new Submission(s["articleSubmissionID"]);
+            sub.set(s);
+            sub.set({submissionTitle: sub.title});  // compatibility
+            return sub;
+          })
+          resolve(result);
+        }
+      })
+
+    });
   }
 }
 

@@ -170,45 +170,12 @@ router.get('/articles/:id/submissions/', h.optionLogin, function(req, res) {
 	var articleId = req.params.id;
 	var userID = req.user.userID;
 
-    var query = "   SELECT S.articleSubmissionID, S.articleID, S.userID, S.title AS `submissionTitle`, " +
-                "    S.thumbUrl, S.createdAt, " +
-                "    IF(U.displayName IS NULL, " +
-                "     CONCAT(U.userFirstName, ' ', U.userLastName)," +
-                "     U.displayName) as `userDisplayName`," +
-                "    (SELECT count(articleSubmissionResponseID)" +
-                "      FROM article_submission_response" +
-                "      WHERE articleSubmissionID = S.articleSubmissionID" +
-                "       and responseType = 'Upvote') AS `upvotes`," +
-                "    (SELECT count(articleSubmissionResponseID)" +
-                "      FROM article_submission_response" +
-                "      WHERE articleSubmissionID = S.articleSubmissionID" +
-                "       and responseType = 'Downvote') AS `downvotes`," +
-				"	 IF(R.articleSubmissionResponseID IS NULL, " +
-				"	  'false', 'true') as `userLiked`" +
-		        "   FROM article_submission AS `S`" +
-		        "   INNER JOIN users AS `U`" +
-		        "    ON S.userID = U.userID" +
-				" 	LEFT JOIN article_submission_response AS `R`" +
-				"	 ON (S.articleSubmissionID = R.articleSubmissionID AND R.userID = '"+userID+"')" +
-				"	WHERE S.articleID = '" + articleId + "' " +
-		        "   ORDER BY createdAt";
-
-    db.query(query, function(err, result) {
-
-		if (err) {
-			console.error(err.stack);
-			res.status(500).send('Error while querying database');
-		}
-
-		else {
-			// send result set as a JSON response
-			res.status(200).json(result);
-		}
-
-	});
-
+  (new Article(articleId)).submissions_viewing_user(new User(userID)).then((subs) => {
+		res.status(200).json(subs.map(s => s.serialized));
+	}).catch((err) => {
+		res.status(500).json({error: 'Error in database access'});
+	})
 });
-
 
 /**
  * Get Challenge Submission ID for a Single Article Belonging to a Specific UserID
@@ -366,123 +333,42 @@ router.post('/articles/:article/submissions/:id/', h.ensureLogin, function(req, 
  */
 router.delete('/articles/:article/submissions/:id/', h.ensureLogin, function(req, res) {
 
-	var userID = req.user.userID;
-	var articleID = req.params.article;
-	var subID = req.params.id;
-	var force = req.params.force;
+	let userID = req.user.userID;
+	let articleID = req.params.article;
+	let subID = req.params.id;
+	let force = req.query.force;
 
 	// validate the request data, checking articleID and userID verbosely to prevent unwanted deletes
-	db.query("	SELECT articleSubmissionID" +
-		"		FROM article_submission" +
-		"		WHERE articleSubmissionID = '"+subID+"'" +
-		"		 and articleID = '"+articleID+"'" +
-		"		 and userID = '"+userID+"'" +
-		"		LIMIT 1", function(err, check) {
-
-		if (err) {
-			console.error(err.stack);
-			res.status(500).send('Error while querying database');
-		}
-		else {
-
-			// empty result set
-			if(check.length == 0) {
-				res.status(200).json({
+	(new Submission(subID)).load().then(async (submission) => {
+		if (!submission ||
+			submission.articleID != articleID ||
+			submission.userID != userID) {
+			return res.status(422).json({
+				success: false,
+				errors: "Invalid articleSubmissionID ("+subID+") or user ("+userID+") does not have permission to delete"
+			});
+		} else {
+			let assets = await submission.assets();
+			if (force || assets.length == 0) {
+				await submission.delete_all_assets();
+				await submission.delete_submission(new User(userID));
+				res.status(204).end();
+			} else {
+				let count = assets.length;
+				res.status(422).json({
 					success: false,
-					errors: "Invalid articleSubmissionID ("+subID+") or user ("+userID+") does not have permission to delete"
+					errors: "Can't delete submission (" + subID + ") due to associated assets (" + count + ")"
 				});
 			}
-			else {
-
-				// run delete query
-				var runDelQuery = function(subID) {
-
-					db.query("DELETE FROM article_submission WHERE articleSubmissionID = '"+subID+"' LIMIT 1", function(err, result) {
-
-						if(err) {
-							console.error(err.stack);
-							res.status(500).send('Error while deleting record in database');
-						}
-						else {
-
-							// ensure row was deleted
-							if(result.affectedRows == 1) {
-								res.status(200).json({
-									success: true,
-								});
-							}
-							else {
-								res.status(200).json({
-									success: false,
-									affectedRows: result.affectedRows
-								});
-							}
-
-						}
-
-					}); // end delete query
-				};
-
-				// check if article submission has any assets
-				db.query("SELECT count(articleSubmissionAssetID) AS num_assets FROM article_submission_asset WHERE articleSubmissionID = '"+subID+"'", function(err, assetCount) {
-
-					if(err) {
-						console.error(err.stack);
-						res.status(500).send('Error while querying database');
-					}
-					else {
-						console.log(assetCount);
-						var count = assetCount[0].num_assets;
-						if(count > 0) {
-
-							// check to see if force delete is enabled
-							if (force === 'true') {
-
-								// delete ALL assets for this subID
-								db.query("	DELETE FROM article_submission_asset" +
-									"		WHERE articleSubmissionID = '"+subID+"'", function(err, result) {
-
-									if(err) {
-										console.error(err.stack);
-										res.status(500).send('Error while force-deleting submission assets');
-									}
-									else {
-
-										// ensure row was deleted
-										if(result.affectedRows > 0) {
-
-											// now go ahead and kill the subID
-											runDelQuery(subID);
-										}
-										else {
-											console.error(err.stack);
-											res.status(500).send('Assets detected for subID ('+subID+') but not successfully deleted.');
-										}
-
-									}
-								});
-
-							}
-							// otherwise
-							else {
-								res.status(200).json({
-									success: false,
-									errors: "Can't delete submission (" + subID + ") due to associated assets (" + count + ")"
-								});
-							}
-						}
-
-						else {
-							runDelQuery(subID);
-						}
-					}
-
-				}); // end asset check query
-
-			}
 		}
-	}); // end validation query
-
+	})
+	.catch((err) => {
+		console.error('#### Error in delete request ',err);
+		res.status(500).json({
+			success: false,
+			errors: 'Internal server error'
+		});
+	});
 });
 
 
@@ -555,15 +441,13 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 			let submission = (new Submission(-1)).set({
 				articleID: articleID,
 				userID: userID,
-				// title: (fields['submissionTitle']) ? fields['submissionTitle'] : '',
-				submissionTitle: (req.body['submissionTitle']) ? req.body['submissionTitle'] : '',
-				// status: "Draft"
-				submissionContent: '',
+				title: (req.body['submissionTitle']) ? req.body['submissionTitle'] : '',
+				status: "Draft",
 				createdAt: createdAt
 			});
 
 			// ensure minimum title length
-			if(submission.submissionTitle.length < 3) {
+			if(submission.title.length < 3) {
 				res.status(422).json({
 					success: false,
 					errors: "The submission title ("+submission.title+") must be at least 3 characters long."
