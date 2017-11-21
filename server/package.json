@@ -34,6 +34,7 @@
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
-    "chai-http": "^3.0.0"
+    "chai-http": "^3.0.0",
+    "chai-string": "^1.4.0"
   }
 }

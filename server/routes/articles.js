@@ -1,17 +1,18 @@
-var express = require('express');
-var router = express.Router();
-var h = require('../helpers');
-var db = require('../db');
-var http = require('http');
-var fs = require('fs-extra');
-var formidable = require('formidable');
-var path = require('path');
-let Article = require('../models/article');
-let User = require('../models/user');
-let Submission = require('../models/submission');
+const express = require('express');
+const router = express.Router();
+const h = require('../helpers');
+const db = require('../db');
+const http = require('http');
+const fs = require('fs-extra');
+const formidable = require('formidable');
+const path = require('path');
+const Article = require('../models/article');
+const User = require('../models/user');
+const Submission = require('../models/submission');
+const config = require('../config/index');
 
 // configuration (should move to ENV or config file)
-var storageDir = '/var/www/html/storage/submission/photo/';
+const storageDir = config.storageDir;
 
 /**
  * Primary articles index for home page
@@ -601,7 +602,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 	var userID = req.user.userID;
 	var articleSubmissionID = req.params.id;
 
-	console.log('@@@@ Create new asset: ',userID,' article ',articleSubmissionID);
+	// console.log('@@@@ Create new asset: ',userID,' article ',articleSubmissionID,' with body: ',req.body);
 
 	// validate the articleSubmissionID
 	db.query("	SELECT articleSubmissionID" +
@@ -614,7 +615,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 		// error handling
 		if(err || !Array.isArray(check)) {
 			console.error(err.stack);
-			res.status(200).json({
+			res.status(500).json({
 				success: false,
 				errors: "Error while querying database."
 			});
@@ -622,7 +623,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 		// no articleID found
 		else if(check.length == 0) {
-			res.status(200).json({
+			res.status(404).json({
 				success: false,
 				errors: "The provided articleSubmissionID ("+articleSubmissionID+") is invalid or is not editable by this userID ("+userID+")."
 			});
@@ -639,7 +640,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 				if(err) {
 					console.error(err.stack);
-					res.status(200).json({
+					res.status(500).json({
 						success: false,
 						errors: "Error while parsing user form."
 					});
@@ -676,7 +677,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 					// validate assetType
 					if(!type.match(/^(Image|Video|Text)$/)) {
-						res.status(200).json({
+						res.status(422).json({
 							success: false,
 							errors: "Invalid asset type specified ("+fields['type']+") -- needs to be Image, Video, or Text"
 						});
@@ -695,7 +696,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 
 						// user provided URL to asset
-						if(fields['url']) {
+						if (fields['url']) {
 
 							url = fields['url'];
 
@@ -703,7 +704,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 							ext = url.split('.').pop();
 
 							if(!ext.match(/^(jpg|jpeg|gif|png)$/i)) {
-								res.status(200).json({
+								res.status(422).json({
 									success: false,
 									errors: "Invalid file reference extension from URL ("+url+")"
 								});
@@ -752,7 +753,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 								// make sure this file has a valid extension
 								if(!ext.match(/^(jpg|jpeg|gif|png)$/i)) {
-									res.status(200).json({
+									res.status(422).json({
 										success: false,
 										errors: "Invalid file upload extension ("+ext+")"
 									});
@@ -766,14 +767,14 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 									filename = timestamp.toString() + assetfile.name;
 									var fullpath = path.join(storageDir, prefix+filename);
 
-									console.log('Writing file to ' + fullpath);
+									// console.log('@@@@ Writing file to ' + fullpath);
 
 									// copy file out of temp
 									fs.copy(oldpath, fullpath, function (err) {
 
 										if (err) {
 											console.error(err.stack);
-											res.status(200).json({
+											res.status(422).json({
 												success: false,
 												errors: "Error while writing file upload (" + fullpath + ")"
 											});
@@ -802,7 +803,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 							}
 							else {
-								res.status(200).json({
+								res.status(422).json({
 									success: false,
 									errors: "No valid URL or file upload provided"
 								});
@@ -950,7 +951,7 @@ router.delete('/articles/:article/submissions/:sub/asset/:id', h.ensureLogin, fu
 
 
 
-router.get('/articles/gallery/:id',h.tokenDecode,function(req, res){
+router.get('/articles/gallery/:id',h.tokenDecode,function(req, res) {
 
 	/**
      * example result
@@ -987,8 +988,7 @@ router.get('/articles/gallery/:id',h.tokenDecode,function(req, res){
             "total_pages": 1,
             "total": 1
         }
-    ]
-}
+    ]}
 	 */
 	var articleID=req.params.id;
     var page = req.query.page;

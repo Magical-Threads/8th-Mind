@@ -78,4 +78,4 @@ describe('Submission', function() {
     let assets = await sub.assets();
     expect(assets.length).to.equal(1);
   });
-})
+});

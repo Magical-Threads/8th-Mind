@@ -1,15 +1,19 @@
-let mocha = require('mocha');
-let chai = require('chai');
-let expect = chai.expect;
-let chaiHttp = require('chai-http');
+const mocha = require('mocha');
+const chai = require('chai');
+const expect = chai.expect;
+const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
-let support = require('./support');
+const chaiString = require('chai-string');
+chai.use(chaiString);
+const support = require('./support');
+const path = require('path');
+const {readFileSync} = require("fs");
 
-let db = require('../db');
-let Article = require('../models/article');
-let User = require('../models/user');
-let Submission = require('../models/submission');
-let Asset = require('../models/asset');
+const db = require('../db');
+const Article = require('../models/article');
+const User = require('../models/user');
+const Submission = require('../models/submission');
+const Asset = require('../models/asset');
 
 describe('article routes', function() {
   before(async function() {
@@ -264,8 +268,40 @@ describe('article routes', function() {
         expect(subs.length).to.equal(0);
       });
     });
+    it('should be able to record a like for a submission from a user');
     describe('asset routes', function() {
-      it('should be able to add assets to a submission');
+      it('should be able to add assets to a submission', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id
+        });
+        sub = await sub.create();
+        let asset = new Asset(-1);
+        asset.set({
+          articleSubmissionID: sub.id,
+          caption: 'TESTING',
+          assetPath: ''
+        });
+        await chai.request(a)
+        .post('/articles/53/submissions/'+sub.id+'/asset/new')
+        .set('authorization', u.token)
+        .field('caption', 'TESTING')
+        .field('type', 'Image')
+        .attach('assetfile', readFileSync(path.join(__dirname, 'KoLinaBeach.png')), 'KoLinaBeach.png')
+        .then(async (res) => {
+          expect(res.status).to.equal(200);
+          let assets = await sub.assets();
+          expect(assets.length).to.equal(1);
+          expect(assets[0].assetPath).to.endWith('KoLinaBeach.png');
+        }).catch(async (err) => {
+          console.error('#### Error in test: ',err.response.body);
+          throw err;
+        })
+      });
       it('should be able to remove assets from a submission');
       it('should be able to list the assets for a submission');
       it('should be able to return details of an asset for a submission');
