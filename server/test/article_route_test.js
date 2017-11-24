@@ -7,8 +7,9 @@ const chaiString = require('chai-string');
 chai.use(chaiString);
 const support = require('./support');
 const path = require('path');
-const {readFileSync} = require("fs");
+const fs = require("fs");
 
+const config = require('../config/index');
 const db = require('../db');
 const Article = require('../models/article');
 const User = require('../models/user');
@@ -23,6 +24,7 @@ describe('article routes', function() {
   beforeEach(async function() {
     await support.clear_submissions();
     await support.clear_assets();
+    await support.clear_asset_storage();
   });
   describe('basic access', function() {
     it('should allow an article to be created');
@@ -280,29 +282,58 @@ describe('article routes', function() {
           articleID: article.id, userID: u.id
         });
         sub = await sub.create();
-        let asset = new Asset(-1);
-        asset.set({
-          articleSubmissionID: sub.id,
-          caption: 'TESTING',
-          assetPath: ''
-        });
         await chai.request(a)
         .post('/articles/53/submissions/'+sub.id+'/asset/new')
         .set('authorization', u.token)
         .field('caption', 'TESTING')
         .field('type', 'Image')
-        .attach('assetfile', readFileSync(path.join(__dirname, 'KoLinaBeach.png')), 'KoLinaBeach.png')
+        .attach('assetfile', fs.readFileSync(path.join(__dirname, 'KoLinaBeach.png')), 'KoLinaBeach.png')
         .then(async (res) => {
           expect(res.status).to.equal(200);
           let assets = await sub.assets();
           expect(assets.length).to.equal(1);
           expect(assets[0].assetPath).to.endWith('KoLinaBeach.png');
-        }).catch(async (err) => {
-          console.error('#### Error in test: ',err.response.body);
-          throw err;
+          expect(fs.existsSync(path.join(config.storageDir,assets[0].assetPath))).to.be.true;
+        // }).catch(async (err) => {
+        //   console.error('#### Error in test: ',err);
+        //   throw err;
         })
       });
-      it('should be able to remove assets from a submission');
+      it('should be able to remove assets from a submission', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id
+        });
+        sub = await sub.create();
+        let asset = await chai.request(a)
+        .post('/articles/53/submissions/'+sub.id+'/asset/new')
+        .set('authorization', u.token)
+        .field('caption', 'TESTING')
+        .field('type', 'Image')
+        .attach('assetfile', fs.readFileSync(path.join(__dirname, 'KoLinaBeach.png')), 'KoLinaBeach.png')
+        .then(async (res) => {
+          expect(res.status).to.equal(200);
+          let assets = await sub.assets();
+          expect(assets.length).to.equal(1);
+          expect(assets[0].assetPath).to.endWith('KoLinaBeach.png');
+          expect(fs.existsSync(path.join(config.storageDir,assets[0].assetPath))).to.be.true;
+          return assets[0];
+        })
+        await chai.request(a)
+        .delete('/articles/53/submissions/'+sub.id+'/asset/'+asset.articleSubmissionAssetID)
+        .set('authorization', u.token)
+        .then(async (res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body.affectedRows).to.equal(1);
+          expect(fs.existsSync(path.join(config.storageDir,asset.assetPath))).to.be.false;
+          let assets = await sub.assets();
+          expect(assets.length).to.equal(0);
+        })
+      });
       it('should be able to list the assets for a submission');
       it('should be able to return details of an asset for a submission');
     });

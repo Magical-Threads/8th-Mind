@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "chai-http": "^3.0.0",
-    "chai-string": "^1.4.0"
+    "chai-string": "^1.4.0",
+    "glob": "^7.1.2"
   }
 }

@@ -40,16 +40,23 @@ export default ApplicationAdapter.extend({
 				modelName, id, snapshot, requestType, query);
 		}
 	},
-	// handleResponse(status, headers, payload) {
-	// 	console.log('@@@@ In handle response. Submission  Status: ',status,' headers: ',headers,' payload: ',payload);
-	// 	if (payload && payload.success) {
-	// 		if (payload.result) {
-	// 			return payload.result;
-	// 		} else {
-	// 			return payload;
-	// 		}
-	// 	} else {
-	// 		return this._super(a, b, c);
-	// 	}
-	// }
+	handleResponse(status, headers, payload) {
+		console.log('@@@@ In handle response. Submission  Status: ',status,' headers: ',headers,' payload: ',payload);
+		if (payload && payload.success) {
+			if (payload.result) {
+				return payload.result;
+			} else {
+				return this._super(status, headers, payload);
+			}
+		} else if (payload && !payload.success && payload.errors) {
+			console.log('@@@@ Converting errors to JSON-API ',payload.errors,' ',typeof payload.errors)
+			if (typeof payload.errors === 'string') {
+				return {errors: [{title: payload.errors}]}
+			} else {
+				return this._super(status, headers, payload);
+			}
+		} else {
+			return this._super(status, headers, payload);
+		}
+	}
 });

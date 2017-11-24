@@ -55,6 +55,7 @@ class Submission extends Base {
    * Delete the submission from the database.
    */
   async delete_submission(user) {
+    await this.delete_all_assets();
     return new Promise((resolve, reject) => {
       let sql = "	DELETE " +
     		" FROM article_submission" +
@@ -89,9 +90,33 @@ class Submission extends Base {
     })
   }
   /**
+   * Return the assets for this submission owned by the provided user ID
+   */
+  async assets_for_user(userID) {
+    return new Promise((resolve, reject) => {
+      db.query("SELECT * FROM article_submission_asset ASA "+
+      "		INNER JOIN article_submission ASub " +
+  		"		 ON (ASA.articleSubmissionID = ASub.articleSubmissionID and ASub.userID = ?)" +
+      "WHERE ASA.articleSubmissionID = ?",
+        [userID, this.id], (err, result) => {
+        if (err) {
+          console.error("#### Error in database query ",err);
+          reject(err);
+        } else {
+          let assets = result.map(a => (new Asset(a.articleSubmissionAssetID)).set(a))
+          resolve(assets);
+        }
+      });
+    })
+  }
+  /**
    * Delete all assets for this submission.
    */
   async delete_all_assets() {
+    let assets = await this.assets();
+    for (let a of assets) {
+      await a.delete_uploads();
+    }
     return new Promise((resolve, reject) => {
       db.query("DELETE FROM article_submission_asset WHERE articleSubmissionID = ?",
         this.id, (err, result) => {

@@ -35,17 +35,17 @@ router.get('/articles', function(req, res){
 	// console.error("@@@@@@ tag: ",tag," phrase: ",tag_phrase);
 
 	// todo: determine if we still need a left join here (will there ever be orphan articles with no userID?) -RJD
-	query = "	SELECT articles.articleID, articles.articleTitle, "+
+	query = "SELECT articles.articleID, articles.articleTitle, "+
 		"articles.articleDescription, articles.articleAllowSubmission, " +
-		"		 articles.articleImage, articles.articleTags, users.userFirstName, "+
+		" articles.articleImage, articles.articleTags, users.userFirstName, "+
 		"users.userLastName," +
-		"		 articles.articleStartDate " +
-		"		FROM articles " +
-		"		LEFT JOIN users on articles.userID=users.userID " +
-		"		WHERE articles.articleStatus='Active' " +
+		" articles.articleStartDate " +
+		" FROM articles " +
+		" LEFT JOIN users on articles.userID=users.userID " +
+		" WHERE articles.articleStatus='Active' " +
 		tag_phrase +
-		"		ORDER BY articleStartDate DESC " +
-		"		LIMIT "+offset+","+per_page;
+		" ORDER BY articleStartDate DESC " +
+		" LIMIT "+offset+","+per_page;
 
 	// console.log("@@@@ query string: '"+query+"'")
 
@@ -842,110 +842,30 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
  */
 router.delete('/articles/:article/submissions/:sub/asset/:id', h.ensureLogin, function(req, res) {
 
-	var userID = req.user.userID;
-	var articleID = req.params.article;
-	var subID = req.params.sub; // do we want to use this for additional precaution?
-	var assetID = req.params.id;
+	const userID = req.user.userID;
+	const articleID = req.params.article;
+	const subID = req.params.sub; // do we want to use this for additional precaution?
+	const assetID = req.params.id;
 
-	// ensure that this asset is valid and the user has permission to delete
-	db.query("	SELECT ASA.articleSubmissionAssetID, ASA.assetPath " +
-		"		FROM article_submission_asset ASA " +
-		"		INNER JOIN article_submission ASub " +
-		"		 ON (ASA.articleSubmissionID = ASub.articleSubmissionID and ASub.userID = '"+userID+"')" +
-		"		WHERE ASub.articleID = '"+articleID+"' and ASA.articleSubmissionAssetID = '"+assetID+"'" +
-		"		LIMIT 1", function(err, check) {
-
-		// error handling
-		if(err || !Array.isArray(check)) {
-			console.error(err.stack);
+	(new Submission(subID)).assets_for_user(userID).then((assets) => {;
+		let promises = []
+		for (let a of assets) {
+			if (a.id == assetID) {
+			 	promises.push(a.delete());
+			}
+		}
+		Promise.all(promises).then(() => {
 			res.status(200).json({
-				success: false,
-				errors: "Error while querying database to validate submission asset."
+				success: true,
+				affectedRows: assets.length,
 			});
-		}
-		else {
-
-			// empty result set
-			if(check.length == 0) {
-				res.status(200).json({
-					success: false,
-					errors: "Invalid articleSubmissionAssetID ("+assetID+") or user ("+userID+") does not have permission to delete"
-				});
-			}
-
-			else {
-
-				var filename = check[0].assetPath;
-
-				// private method for delete query
-				var deleteQuery = function(assetID) {
-
-					// delete the record
-					db.query("	DELETE FROM article_submission_asset" +
-						"		WHERE articleSubmissionAssetID = '"+assetID+"'" +
-						"		LIMIT 1", function(err, result) {
-
-						if(err) {
-							console.error(err.stack);
-							res.status(500).send('Error while deleting record in database');
-						}
-						else {
-
-							// ensure row was deleted
-							if(result.affectedRows === 1) {
-								res.status(200).json({
-									success: true,
-									affectedRows: result.affectedRows
-								});
-							}
-							else {
-								res.status(200).json({
-									success: false,
-									affectedRows: result.affectedRows
-								});
-							}
-
-						}
-
-
-					});
-				}; // end deleteQuery()
-
-
-				// check if the file exists
-				fs.pathExists(path.join(storageDir, filename), (err, exists) => {
-
-					// if the file exists, try to delete it
-					if(exists) {
-
-						fs.remove(path.join(storageDir, filename), err => {
-
-							if(!err) {
-								deleteQuery(assetID);
-							}
-							else {
-								console.error(err.stack);
-								res.status(200).json({
-									success: false,
-									errors: "Error attempting to delete file ("+filename+")"
-								});
-							}
-
-						});
-
-					}
-
-					// if the file is missing, delete the orphaned record
-					else {
-						console.log('Warning: Unable to find file on record ('+filename+') -- deleting orphan record');
-						deleteQuery(assetID);
-					}
-
-				}); // end pathExists
-
-			}
-
-		}
+		}).catch((err) => {
+			console.error('#### Error in deleteing assets for user', err);
+			res.status(500).json({
+				success: false,
+				errors: "Error deleting assets."
+			});
+		})
 	});
 });
 

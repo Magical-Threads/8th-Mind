@@ -1,10 +1,14 @@
-let mocha = require('mocha');
-let chai = require('chai');
-let expect = chai.expect;
-let chaiHttp = require('chai-http');
+const mocha = require('mocha');
+const chai = require('chai');
+const expect = chai.expect;
+const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
-let db = require('../db');
-let User = require('../models/user');
+const db = require('../db');
+const User = require('../models/user');
+const glob = require('glob');
+const path = require('path');
+const config = require('../config/index');
+const fs = require('fs');
 
 let test_users = {
   fred: {
@@ -55,11 +59,32 @@ async function clear_assets() {
     });
   });
 }
+async function clear_asset_storage() {
+  await new Promise((resolve, reject) => {
+    glob(path.join(config.storageDir, '*Beach.png'), (err, files) => {
+      try {
+        if (err) {
+          console.error('#### Error in cleaning up storage', err);
+          reject(err);
+        } else {
+          for (let f of files) {
+            fs.unlinkSync(f);
+          }
+        }
+        resolve();
+      } catch (err2) {
+        console.error('#### error in removing asset files', err2);
+        reject(err2);
+      }
+    });
+  })
+}
 
 module.exports = {
   clear_users,
   clear_submissions,
   clear_assets,
   register_users,
-  test_users
+  test_users,
+  clear_asset_storage
 }

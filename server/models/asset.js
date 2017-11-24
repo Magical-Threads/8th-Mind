@@ -1,5 +1,8 @@
-let db = require('../db');
-let Base = require('./base');
+const db = require('../db');
+const Base = require('./base');
+const path = require('path');
+const config = require('../config/index');
+const fs = require('fs');
 
 /**
  * Class for submissions to articles.
@@ -29,6 +32,34 @@ class Asset extends Base {
         }
       });
     })
+  }
+
+  /**
+   * If the asset has an upload vs. a public url remove it from the server.
+   */
+  async delete_uploads() {
+    if (this.assetPath && this.assetPath != '') {
+      const full_path = path.join(config.storageDir, this.assetPath);
+      fs.unlinkSync(full_path);
+    }
+  }
+
+  /**
+   * Delete the asset and any uploads.
+   */
+  async delete() {
+    await new Promise((resolve, reject) => {
+      db.query("DELETE FROM article_submission_asset WHERE articleSubmissionAssetID = ?",
+      this.id, (err, result) => {
+        if (err) {
+          console.error('#### Error in deleting asset record in db: ',err);
+          reject(err);
+        } else {
+          resolve();
+        }
+      })
+    })
+    await this.delete_uploads();
   }
 }
 
