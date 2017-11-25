@@ -34,8 +34,7 @@ export default Ember.Route.extend(ResetScrollMixin, {
 		const article = this.modelFor('article').article;
 		const session = this.get('session').session.content.authenticated;
 		const store = this.get('store');
-		
-		return { article, session, store };
+
+		return Ember.Object.create({ article, session, store });
 	}
 });
-

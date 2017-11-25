@@ -21,35 +21,39 @@ const storageDir = config.storageDir;
  * @param {int} page - which page of content to show
  */
 router.get('/articles', function(req, res){
-	let page = req.query.page;
-	let per_page = req.query.per_page;
+	let page = parseInt(req.query.page);
+	let per_page = parseInt(req.query.per_page);
 	let tag = req.query.tag;
-	if (!page) { page = 1; }
+	if (!page || page < 1) { page = 1; }
 	if (!per_page) { per_page = 10; }
 
 	var offset = (page - 1) * per_page;
 	var pagination=[];
+	var qparams = [offset, per_page];
 
-	var tag_phrase = tag ? "AND articles.articleTags='"+tag+"' " : "";
+	var tag_phrase = tag ? " AND articles.articleTags=? " : "";
+	if (tag) {
+		qparams.unshift(tag);
+	}
 
 	// console.error("@@@@@@ tag: ",tag," phrase: ",tag_phrase);
 
 	// todo: determine if we still need a left join here (will there ever be orphan articles with no userID?) -RJD
 	query = "SELECT articles.articleID, articles.articleTitle, "+
-		"articles.articleDescription, articles.articleAllowSubmission, " +
+		" articles.articleDescription, articles.articleAllowSubmission, " +
 		" articles.articleImage, articles.articleTags, users.userFirstName, "+
-		"users.userLastName," +
+		" users.userLastName," +
 		" articles.articleStartDate " +
 		" FROM articles " +
 		" LEFT JOIN users on articles.userID=users.userID " +
 		" WHERE articles.articleStatus='Active' " +
 		tag_phrase +
 		" ORDER BY articleStartDate DESC " +
-		" LIMIT "+offset+","+per_page;
+		" LIMIT ?,?";
 
 	// console.log("@@@@ query string: '"+query+"'")
 
-	db.query(query, function (err, result) {
+	db.query(query, qparams, function (err, result) {
 		if (err) {
 			console.error("#### Error in getting list of articles: ",err);
 			res.status(500).json({error: err});

@@ -19,7 +19,16 @@ export default Ember.Component.extend({
 
 			let rec = store.createRecord('submission', {title: submissionTitle});
 			model.article.get('submissions').pushObject(rec);
-			rec.save({adapterOptions: {articleID: model.article.id}});
+			rec.save({adapterOptions: {articleID: model.get('article').id}})
+			.then(() => {
+				// Save succeeded
+			}).catch((err) => {
+				// Save failed with error
+				console.error('#### Error in save ',err);
+				console.error('#### Submission errors: ',rec.get('errors').toArray());
+				console.error('#### Submission isValid: ',rec.get('isValid'))
+				model.set('errors', err.errors);
+			})
 			// let assetCaption = this.get('assetCaption');
 			// let session = this.get('session');
 			// let token = session.get('data').authenticated.access_token;

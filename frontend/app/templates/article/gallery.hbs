@@ -10,9 +10,11 @@
 					<svg viewBox="0 0 11.05 16.8"><polyline points="8.6,15.5 1.2,8.2 8.6,1.2"></polyline></svg>
 				</span>
 				{{#link-to "article" model.article.id}} Back to the Challenge {{/link-to}}
-				<button id="button-show-upload" type="button" class="button button-blue"
-					{{action "showGallerySubmission"}}>Create Your Submission</button>
-				{{challenge-submit model=model store=store}}
+				{{#if model.article.allowSubmission}}
+					<button id="button-show-upload" type="button" class="button button-blue"
+						{{action "showGallerySubmission"}}>Create Your Submission</button>
+					{{challenge-submit model=model store=store}}
+				{{/if}}
 			</div>
 
 			{{!-- Submission Type - Photo --}}
@@ -30,12 +32,14 @@
 				{{log model}}
 				<div class="challenge-submissions">
 					{{#each model.article.submissions as |submission index|}}
-						{{challenge-submission
-							article=model.article
-							submission=submission
-							session=model.session
-							store=model.store
-						}}
+						{{#if submission.id}}
+							{{challenge-submission
+								article=model.article
+								submission=submission
+								session=model.session
+								store=model.store
+							}}
+						{{/if}}
 					{{/each}}
 				</div>
 
