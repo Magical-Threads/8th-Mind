@@ -334,7 +334,37 @@ describe('article routes', function() {
           expect(assets.length).to.equal(0);
         })
       });
-      it('should be able to list the assets for a submission');
+      it('should be able to list the assets for a submission', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id})
+        sub = await sub.create();
+        let asset = new Asset(-1);
+        asset.set({
+          articleSubmissionID: sub.id,
+          caption: 'TESTING',
+          assetPath: ''
+        });
+        asset = await asset.create();
+        let asset2 = new Asset(-1);
+        asset2.set({
+          articleSubmissionID: sub.id,
+          caption: 'TESTING',
+          assetPath: ''
+        });
+        asset2 = await asset2.create();
+        await chai.request(a)
+        .get('/articles/53/submissions/'+sub.id)
+        .then((res) => {
+          expect(res).to.exist;
+          expect(res.status).to.equal(200);
+          expect(res.body.assets.map(a => a.articleSubmissionAssetID)).to.deep.equal([asset.id, asset2.id]);
+        })
+      });
       it('should be able to return details of an asset for a submission');
     });
   });

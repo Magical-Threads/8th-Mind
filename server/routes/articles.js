@@ -456,14 +456,12 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 			});
 
 			// ensure minimum title length
-			if(submission.title.length < 3) {
+			if (submission.title.length < 3) {
 				res.status(422).json({
 					success: false,
 					errors: "The submission title ("+submission.title+") must be at least 3 characters long."
 				});
-			}
-
-			else {
+			} else {
 				await submission.create();
 				res.status(200).json({
 					success: true,
@@ -601,7 +599,8 @@ router.delete('/articles/:article/submissions/:id/upvote', h.ensureLogin, functi
  * @param {string} url - url of asset file (must be image as of 10/11)
  * @author Ray Dollete <ray@raydollete.com>
  */
-router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, function(req, res) {
+router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin,
+	function(req, res) {
 
 	var userID = req.user.userID;
 	var articleSubmissionID = req.params.id;
@@ -673,7 +672,6 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 							}
 
 							else {
-
 								res.status(200).json({
 									success: true,
 									data: submissionAsset,

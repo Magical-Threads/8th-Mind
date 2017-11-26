@@ -37,5 +37,37 @@ describe('Article', function() {
         'Article', 'Articles', 'Challenge', 'Create'
       ]);
     });
+    it('can return a list of articles on a page', async function() {
+      let articles = await Article.articles_on_page(1,3);
+      expect(articles).to.exist;
+      expect(articles.length).to.equal(3);
+      expect(articles.map(a => a.articleID)).to.deep.equal(
+        [56,53,52]);
+      expect(articles.map(a => a.articleTags)).to.deep.equal(
+        ['Article', 'Article','Create']);
+      articles = await Article.articles_on_page(2,5);
+      expect(articles).to.exist;
+      expect(articles.length).to.equal(5);
+      expect(articles.map(a => a.articleID)).to.deep.equal(
+        [45, 49, 50, 44, 43]);
+      expect(articles.map(a => a.articleTags)).to.deep.equal(
+        ['Create', 'Article','Articles', 'Create', 'Article']);
+    });
+    it('can return a list of articles with a given tag on a page', async function() {
+      let articles = await Article.articles_on_page(1,3, 'Article');
+      expect(articles).to.exist;
+      expect(articles.length).to.equal(3);
+      expect(articles.map(a => a.articleID)).to.deep.equal(
+        [56,53,51]);
+      expect(articles.map(a => a.articleTags)).to.deep.equal(
+        ['Article', 'Article','Article']);
+      articles = await Article.articles_on_page(2,5, 'Article');
+      expect(articles).to.exist;
+      expect(articles.length).to.equal(5);
+      expect(articles.map(a => a.articleID)).to.deep.equal(
+        [43, 40, 39, 37, 35]);
+      expect(articles.map(a => a.articleTags)).to.deep.equal(
+        ['Article', 'Article','Article', 'Article', 'Article']);
+    })
   });
 })

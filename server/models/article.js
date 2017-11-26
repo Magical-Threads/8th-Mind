@@ -33,6 +33,57 @@ class Article extends Base {
     });
   }
   /**
+   * Return the set of articles that are on a select page, and which optionally
+   * have a specified tag.
+   * @param {int} page - The page to retrieve
+   * @param {int} per_page - The number of entries per page
+   * @param {string} tag - optional tag value to limit results to
+   * @return {Article[]} - articles matching the tag on the specified page
+   */
+  static async articles_on_page(page, per_page, tag) {
+    if (!page || page < 1) { page = 1; }
+  	if (!per_page) { per_page = 10; }
+
+  	var offset = (page - 1) * per_page;
+  	var qparams = [offset, per_page];
+
+  	var tag_phrase = '';
+  	if (tag) {
+      tag_phrase = ' AND articles.articleTags=? ';
+  		qparams.unshift(tag);
+  	}
+
+  	// console.error("@@@@@@ tag: ",tag," phrase: ",tag_phrase);
+
+  	// todo: determine if we still need a left join here (will there ever be orphan articles with no userID?) -RJD
+  	let query = "SELECT articles.articleID, articles.articleTitle, "+
+  		" articles.articleDescription, articles.articleAllowSubmission, " +
+  		" articles.articleImage, articles.articleTags, users.userFirstName, "+
+  		" users.userLastName," +
+  		" articles.articleStartDate " +
+  		" FROM articles " +
+  		" LEFT JOIN users on articles.userID=users.userID " +
+  		" WHERE articles.articleStatus='Active' " +
+  		tag_phrase +
+  		" ORDER BY articleStartDate DESC " +
+  		" LIMIT ?,?";
+
+  	// console.log("@@@@ query string: '"+query+"'")
+
+    return new Promise((resolve, reject) => {
+    	db.query(query, qparams, (err, result) => {
+        if (err) {
+          console.error('#### Error in query for articles', err);
+          reject(err);
+        } else {
+          let articles = result.map(r => (new Article(r.articleID)).set(r));
+          resolve(articles);
+        }
+      });
+    });
+  }
+
+  /**
    * Return the set of tags in use.
    */
   static async all_tags() {
