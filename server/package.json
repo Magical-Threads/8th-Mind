@@ -4,7 +4,7 @@
   "description": "server side for Content Portal",
   "main": "index.js",
   "scripts": {
-    "test": "node --expose-internals ./node_modules/.bin/mocha --exit --reporter spec",
+    "test": "NODE_ENV=test node --expose-internals ./node_modules/.bin/mocha --exit --reporter spec",
     "start": "node index.js"
   },
   "author": "Alex Robbio",

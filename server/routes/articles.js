@@ -657,7 +657,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 					var type = (fields['type']) ? fields['type'] : '';
 
-					console.log('@@@@ Creating asset type ',type,' url: ',fields['url'],' files: ',files);
+					// console.log('@@@@ Creating asset type ',type,' url: ',fields['url'],' files: ',files);
 
 					// define database insert query method (to be called after building record)
 					var insertRecord = function(submissionAsset) {
@@ -779,8 +779,10 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 									// console.log('@@@@ Writing file to ' + fullpath);
 
 									// copy file out of temp
-									console.log('@@@@ Copying file from ',oldpath,' to ',fullpath);
-									console.log('@@@@ storageDir: ',storageDir,' prefix: ',prefix);
+									const env = process.env.NODE_ENV || 'development';
+									// console.log('@@@@ Node env: ',env);
+									// console.log('@@@@ Copying file from ',oldpath,' to ',fullpath);
+									// console.log('@@@@ storageDir: ',storageDir,' prefix: ',prefix);
 									fs.copy(oldpath, fullpath, function (err) {
 
 										if (err) {
