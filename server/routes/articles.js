@@ -606,7 +606,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 	var userID = req.user.userID;
 	var articleSubmissionID = req.params.id;
 
-	console.log('@@@@ Create new asset: ',userID,' article ',articleSubmissionID,' with body: ',req.body);
+	// console.log('@@@@ Create new asset: ',userID,' article ',articleSubmissionID,' with body: ',req.body);
 
 	// validate the articleSubmissionID
 	db.query("	SELECT articleSubmissionID" +
