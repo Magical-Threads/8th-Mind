@@ -1,8 +1,6 @@
-const path = require('path');
 
 const conf = {
-  storageDir: path.join(__dirname, '../../storage')
+  storageDir: '/var/www/html/storage/submission/photo/'
 }
-console.log('@@@@ Config set to ',conf);
 
 module.exports = conf

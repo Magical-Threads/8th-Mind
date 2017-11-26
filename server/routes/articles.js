@@ -606,7 +606,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 	var userID = req.user.userID;
 	var articleSubmissionID = req.params.id;
 
-	// console.log('@@@@ Create new asset: ',userID,' article ',articleSubmissionID,' with body: ',req.body);
+	console.log('@@@@ Create new asset: ',userID,' article ',articleSubmissionID,' with body: ',req.body);
 
 	// validate the articleSubmissionID
 	db.query("	SELECT articleSubmissionID" +
@@ -618,6 +618,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 		// error handling
 		if(err || !Array.isArray(check)) {
+			console.error(err);
 			console.error(err.stack);
 			res.status(500).json({
 				success: false,
@@ -627,6 +628,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 
 		// no articleID found
 		else if(check.length == 0) {
+			console.log('@@@@ Failed to find submission')
 			res.status(404).json({
 				success: false,
 				errors: "The provided articleSubmissionID ("+articleSubmissionID+") is invalid or is not editable by this userID ("+userID+")."
@@ -643,6 +645,7 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 			form.parse(req, function (err, fields, files) {
 
 				if(err) {
+					console.error(err);
 					console.error(err.stack);
 					res.status(500).json({
 						success: false,
@@ -653,6 +656,8 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 				else {
 
 					var type = (fields['type']) ? fields['type'] : '';
+
+					console.log('@@@@ Creating asset type ',type,' url: ',fields['url'],' files: ',files);
 
 					// define database insert query method (to be called after building record)
 					var insertRecord = function(submissionAsset) {
@@ -774,11 +779,14 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin, funct
 									// console.log('@@@@ Writing file to ' + fullpath);
 
 									// copy file out of temp
+									console.log('@@@@ Copying file from ',oldpath,' to ',fullpath);
+									console.log('@@@@ storageDir: ',storageDir,' prefix: ',prefix);
 									fs.copy(oldpath, fullpath, function (err) {
 
 										if (err) {
+											console.error(err);
 											console.error(err.stack);
-											res.status(422).json({
+											res.status(500).json({
 												success: false,
 												errors: "Error while writing file upload (" + fullpath + ")"
 											});

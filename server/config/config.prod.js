@@ -1,5 +1,5 @@
 const conf = {
-  storageDir: '/var/www/html/storage/submission/photo/';
+  storageDir: '/var/www/html/storage/submission/photo/'
 }
 
 module.exports = conf
