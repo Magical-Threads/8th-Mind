@@ -2,7 +2,7 @@ const db = require('../db');
 const Base = require('./base');
 const path = require('path');
 const config = require('../config/index');
-const fs = require('fs');
+const fse = require('fs-extra');
 
 /**
  * Class for submissions to articles.
@@ -17,6 +17,38 @@ class Asset extends Base {
     super(id);
   }
 
+  /**
+   * Copy an asset from a url to the app storage area.
+   * @param {string} url - The url holding the asset
+   * @param {string} destination - The storage location to receive the asset
+   */
+  static async copy_url_to_storage(url, destination) {
+    return new Promise((resolve, reject) => {
+      var curl = fs.createWriteStream(destination);
+      http.get(url, (response) => {
+        // todo: error handling
+        response.pipe(curl);
+        resolve();
+      });
+    });
+  }
+  /**
+   * Copy a local file from one location to another.
+   * @param {string} sourcePath - The file location currently
+   * @param {string} destinationPath - Where the file will be copied
+   */
+  static async copy_local_file(sourcePath, destinationPath) {
+    return new Promise((resolve, reject) => {
+      fse.copy(sourcePath, destinationPath, (err) => {
+        if (err) {
+          console.error('#### Error in copying local file', err);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
   /**
    * Create a new asset from the values in this object.
    * articleSubmissionID must be set on this object.
@@ -40,7 +72,7 @@ class Asset extends Base {
   async delete_uploads() {
     if (this.assetPath && this.assetPath != '') {
       const full_path = path.join(config.storageDir, this.assetPath);
-      fs.unlinkSync(full_path);
+      fse.unlinkSync(full_path);
     }
   }
 
@@ -61,6 +93,7 @@ class Asset extends Base {
     })
     await this.delete_uploads();
   }
+
 }
 
 module.exports = Asset;

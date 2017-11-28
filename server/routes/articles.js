@@ -2,13 +2,12 @@ const express = require('express');
 const router = express.Router();
 const h = require('../helpers');
 const db = require('../db');
-const http = require('http');
-const fs = require('fs-extra');
 const formidable = require('formidable');
 const path = require('path');
 const Article = require('../models/article');
 const User = require('../models/user');
 const Submission = require('../models/submission');
+const Asset = require('../models/asset.js');
 const config = require('../config/index');
 
 // configuration (should move to ENV or config file)
@@ -20,58 +19,33 @@ const storageDir = config.storageDir;
  * @param {int} per_page - number of articles to show on a page
  * @param {int} page - which page of content to show
  */
-router.get('/articles', function(req, res){
-	let page = parseInt(req.query.page);
-	let per_page = parseInt(req.query.per_page);
-	let tag = req.query.tag;
-	if (!page || page < 1) { page = 1; }
-	if (!per_page) { per_page = 10; }
+router.get('/articles', function(req, res) {
+	try {
+		const page = parseInt(req.query.page) || 1;
+		const per_page = parseInt(req.query.per_page) || 10;
+		const tag = req.query.tag;
 
-	var offset = (page - 1) * per_page;
-	var pagination=[];
-	var qparams = [offset, per_page];
-
-	var tag_phrase = tag ? " AND articles.articleTags=? " : "";
-	if (tag) {
-		qparams.unshift(tag);
-	}
-
-	// console.error("@@@@@@ tag: ",tag," phrase: ",tag_phrase);
-
-	// todo: determine if we still need a left join here (will there ever be orphan articles with no userID?) -RJD
-	query = "SELECT articles.articleID, articles.articleTitle, "+
-		" articles.articleDescription, articles.articleAllowSubmission, " +
-		" articles.articleImage, articles.articleTags, users.userFirstName, "+
-		" users.userLastName," +
-		" articles.articleStartDate " +
-		" FROM articles " +
-		" LEFT JOIN users on articles.userID=users.userID " +
-		" WHERE articles.articleStatus='Active' " +
-		tag_phrase +
-		" ORDER BY articleStartDate DESC " +
-		" LIMIT ?,?";
-
-	// console.log("@@@@ query string: '"+query+"'")
-
-	db.query(query, qparams, function (err, result) {
-		if (err) {
-			console.error("#### Error in getting list of articles: ",err);
-			res.status(500).json({error: err});
-		} else {
+		Article.articles_on_page(page, per_page, tag).then((articles) => {
 			Article.count(tag).then((total) => {
+				let pagination=[];
 				let total_pages = total / per_page;
-
 				pagination[0] = {
 					'page': page,
 					'per_page': per_page,
 					'total_pages': total_pages,
 					'total': total
 				};
-
+				const result = articles.map(a => a.serialized);
 				res.status(200).json({result,pagination});
 			});
-		};
-	});
+		}).catch((err) => {
+			console.error('#### Error in querying articles', err);
+			res.status(500).json({errors: [{title: 'Server error'}]});
+		})
+	} catch (err) {
+		console.error('#### Error in route ', err);
+		res.status(500).json({errors: [{title: 'Server error'}]});
+	}
 });
 
 
@@ -171,15 +145,19 @@ router.post('/articles/submission_like/:id',h.ensureLogin, function(req, res){
  * @author Ray Dollete <ray@raydollete.com>
  */
 router.get('/articles/:id/submissions/', h.optionLogin, function(req, res) {
+	try {
+		var articleId = req.params.id;
+		var userID = req.user.userID;
 
-	var articleId = req.params.id;
-	var userID = req.user.userID;
-
-  (new Article(articleId)).submissions_viewing_user(new User(userID)).then((subs) => {
-		res.status(200).json(subs.map(s => s.serialized));
-	}).catch((err) => {
-		res.status(500).json({error: 'Error in database access'});
-	})
+	  (new Article(articleId)).submissions_viewing_user(new User(userID)).then((subs) => {
+			res.status(200).json(subs.map(s => s.serialized));
+		}).catch((err) => {
+			res.status(500).json({errors: [{title: 'Error in database access'}]});
+		});
+	} catch (err) {
+		console.error('#### Server error: ',err);
+		res.status(500).json({errors: [{title: 'Server error'}]});
+	}
 });
 
 /**
@@ -282,7 +260,7 @@ router.get('/articles/:article/submissions/:id/', h.tokenDecode, function(req, r
 					createdAt: sub[0].createdAt
 				};
 
-				console.log({result, sub})
+				// console.log({result, sub})
 
 				// get asset data
 				db.query("	SELECT articleSubmissionAssetID, caption, assetType, assetPath, createdAt" +
@@ -337,50 +315,52 @@ router.post('/articles/:article/submissions/:id/', h.ensureLogin, function(req, 
  * @author Ray Dollete <ray@raydollete.com>
  */
 router.delete('/articles/:article/submissions/:id/', h.ensureLogin, function(req, res) {
+	try {
+		let userID = req.user.userID;
+		let articleID = req.params.article;
+		let subID = req.params.id;
+		let force = req.query.force;
 
-	let userID = req.user.userID;
-	let articleID = req.params.article;
-	let subID = req.params.id;
-	let force = req.query.force;
-
-	// validate the request data, checking articleID and userID verbosely to prevent unwanted deletes
-	(new Submission(subID)).load().then(async (submission) => {
-		if (!submission) {
-			return res.status(404).json({
-				success: false,
-				errors: "Invalid articleSubmissionID ("+subID+") or user ("+userID+") does not have permission to delete"
-			});
-		} else if (submission.articleID != articleID ||
-			submission.userID != userID) {
-			return res.status(403).json({
-				success: false,
-				errors: "Invalid articleSubmissionID ("+subID+") or user ("+userID+") does not have permission to delete"
-			});
-		} else {
-			let assets = await submission.assets();
-			if (force || assets.length == 0) {
-				await submission.delete_all_assets();
-				await submission.delete_submission(new User(userID));
-				res.status(204).end();
-			} else {
-				let count = assets.length;
-				res.status(409).json({
+		// validate the request data, checking articleID and userID verbosely to prevent unwanted deletes
+		(new Submission(subID)).load().then(async (submission) => {
+			if (!submission) {
+				return res.status(404).json({
 					success: false,
-					errors: "Can't delete submission (" + subID + ") due to associated assets (" + count + ")"
+					errors: [{title: "Invalid articleSubmissionID ("+subID+") or user ("+userID+") does not have permission to delete"}]
 				});
+			} else if (submission.articleID != articleID ||
+				submission.userID != userID) {
+				return res.status(403).json({
+					success: false,
+					errors: [{title: "Invalid articleSubmissionID ("+subID+") or user ("+userID+") does not have permission to delete"}]
+				});
+			} else {
+				let assets = await submission.assets();
+				if (force || assets.length == 0) {
+					await submission.delete_all_assets();
+					await submission.delete_submission(new User(userID));
+					res.status(204).end();
+				} else {
+					let count = assets.length;
+					res.status(409).json({
+						success: false,
+						errors: [{title: "Can't delete submission (" + subID + ") due to associated assets (" + count + ")"}]
+					});
+				}
 			}
-		}
-	})
-	.catch((err) => {
-		console.error('#### Error in delete request ',err);
-		res.status(500).json({
-			success: false,
-			errors: 'Internal server error'
+		})
+		.catch((err) => {
+			console.error('#### Error in delete request ',err);
+			res.status(500).json({
+				success: false,
+				errors: [{title: 'Internal server error'}]
+			});
 		});
-	});
+	} catch (err) {
+		console.error('#### Server error: ',err);
+		res.status(500).json({errors: [{title: 'Server error'}]});
+	}
 });
-
-
 
 /**
  * Add new challenge submission
@@ -393,84 +373,88 @@ router.delete('/articles/:article/submissions/:id/', h.ensureLogin, function(req
  * @author Ray Dollete <ray@raydollete.com>
  */
 router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
+	try {
+		var userID = req.user.userID;
+		var articleID = req.params.id;
 
-	var userID = req.user.userID;
-	var articleID = req.params.id;
+		// console.log('@@@@ Create new submission: ',userID,' article ',articleID,' body: ',req.body);
 
-	// console.log('@@@@ Create new submission: ',userID,' article ',articleID,' body: ',req.body);
+		// form processing
+		const dateTime = Date.now();
+		const timestamp = Math.floor(dateTime / 1000);
+		var filenames = timestamp.toString();
+		var createdAt = new Date();
 
-	// form processing
-	const dateTime = Date.now();
-	const timestamp = Math.floor(dateTime / 1000);
-	var filenames = timestamp.toString();
-	var createdAt = new Date();
+		(new Article(articleID)).load().then(async (article) => {
+			let user = await (new User(userID)).load();
+			let submission = await article.submission_for_user(user);
 
-	(new Article(articleID)).load().then(async (article) => {
-		let user = await (new User(userID)).load();
-		let submission = await article.submission_for_user(user);
-
-		// no article found
-		if (!article) {
-			res.status(404).json({
-				success: false,
-				errorCode: 1,
-				errors: "The provided articleID ("+articleID+") is invalid."
-			});
-		}
-
-		// allowArticleSubmission is something other than 'Yes'
-		else if (article.articleAllowSubmission !== 'Yes') {
-			res.status(422).json({
-				success: false,
-				errorCode: 2,
-				errors: "The provided articleID does not allow user submissions."
-			});
-		}
-
-		// no valid userID found in users table
-		else if (!user) {
-			res.status(422).json({
-				success: false,
-				errorCode: 3,
-				errors: "The provided userID ("+userID+") is invalid.  req.user = "+ JSON.stringify(req.user)
-			});
-		}
-
-		// found existing articleSubmission
-		else if (submission) {
-			res.status(422).json({
-				success: false,
-				errorCode: 4,
-				errors: "This userID ("+userID+") has already made an articleSubmissionID ("+submission.articleSubmissionID+") to this articleID ("+articleID+")."
-			});
-		}
-
-		else {
-			// build record to be inserted
-			let submission = (new Submission(-1)).set({
-				articleID: articleID,
-				userID: userID,
-				title: (req.body['submissionTitle']) ? req.body['submissionTitle'] : '',
-				status: "Draft",
-				createdAt: createdAt
-			});
-
-			// ensure minimum title length
-			if (submission.title.length < 3) {
-				res.status(422).json({
+			// no article found
+			if (!article) {
+				res.status(404).json({
 					success: false,
-					errors: "The submission title ("+submission.title+") must be at least 3 characters long."
-				});
-			} else {
-				await submission.create();
-				res.status(200).json({
-					success: true,
-					data: submission,
-					insertId: submission.id
+					errorCode: 1,
+					errors: [{title: "The provided articleID ("+articleID+") is invalid."}]
 				});
 			}
-		}
-	});
+
+			// allowArticleSubmission is something other than 'Yes'
+			else if (article.articleAllowSubmission !== 'Yes') {
+				res.status(422).json({
+					success: false,
+					errorCode: 2,
+					errors: [{title: "The provided articleID does not allow user submissions."}]
+				});
+			}
+
+			// no valid userID found in users table
+			else if (!user) {
+				res.status(422).json({
+					success: false,
+					errorCode: 3,
+					errors: [{title: "The provided userID ("+userID+") is invalid.  req.user = "+ JSON.stringify(req.user)}]
+				});
+			}
+
+			// found existing articleSubmission
+			else if (submission) {
+				res.status(422).json({
+					success: false,
+					errorCode: 4,
+					errors: [{title: "This userID ("+userID+") has already made an articleSubmissionID ("+submission.articleSubmissionID+") to this articleID ("+articleID+")."}]
+				});
+			}
+
+			else {
+				// build record to be inserted
+				let submission = (new Submission(-1)).set({
+					articleID: articleID,
+					userID: userID,
+					title: (req.body['submissionTitle']) ? req.body['submissionTitle'] : '',
+					status: "Draft",
+					createdAt: createdAt
+				});
+
+				// ensure minimum title length
+				if (submission.title.length < 3) {
+					res.status(422).json({
+						success: false,
+						errors: [{title: "The submission title ("+submission.title+") must be at least 3 characters long."}]
+					});
+				} else {
+					await submission.create();
+					res.status(200).json({
+						success: true,
+						data: submission,
+						insertId: submission.id
+					});
+				}
+			}
+		});
+	} catch (err) {
+		console.error('#### Server error: ',err);
+		res.status(500).json({errors: [{title: 'Server error'}]});
+	}
 });
 
 
@@ -601,236 +585,129 @@ router.delete('/articles/:article/submissions/:id/upvote', h.ensureLogin, functi
  */
 router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin,
 	function(req, res) {
+	try {
 
-	var userID = req.user.userID;
-	var articleSubmissionID = req.params.id;
+		const userID = req.user.userID;
+		const articleSubmissionID = req.params.id;
 
-	// console.log('@@@@ Create new asset: ',userID,' article ',articleSubmissionID,' with body: ',req.body);
-
-	// validate the articleSubmissionID
-	db.query("	SELECT articleSubmissionID" +
-		"		FROM article_submission" +
-		"		WHERE articleSubmissionID = '"+articleSubmissionID+"'" +
-		"		 and userID = '"+userID+"' " +
-		"		LIMIT 1", function (err, check) {
-
-
-		// error handling
-		if(err || !Array.isArray(check)) {
-			console.error(err);
-			console.error(err.stack);
-			res.status(500).json({
-				success: false,
-				errors: "Error while querying database."
-			});
-		}
-
-		// no articleID found
-		else if(check.length == 0) {
-			console.log('@@@@ Failed to find submission')
-			res.status(404).json({
-				success: false,
-				errors: "The provided articleSubmissionID ("+articleSubmissionID+") is invalid or is not editable by this userID ("+userID+")."
-			});
-
-		}
-
-		else {
-
-			// parse form
-			var form = new formidable.IncomingForm();
-			form.multiples = false;
-
-			form.parse(req, function (err, fields, files) {
-
-				if(err) {
-					console.error(err);
-					console.error(err.stack);
-					res.status(500).json({
-						success: false,
-						errors: "Error while parsing user form."
-					});
-				}
-
-				else {
-
-					var type = (fields['type']) ? fields['type'] : '';
-
-					// console.log('@@@@ Creating asset type ',type,' url: ',fields['url'],' files: ',files);
-
-					// define database insert query method (to be called after building record)
-					var insertRecord = function(submissionAsset) {
-
-						db.query("INSERT INTO article_submission_asset SET ?", submissionAsset, function (err, result) {
-
-							if(err) {
-								console.error(err.stack);
-								res.status(200).json({
-									success: false,
-									errors: "Error while inserting new record."
-								});
-							}
-
-							else {
-								res.status(200).json({
-									success: true,
-									data: submissionAsset,
-									insertId: result.insertId
-								});
-							}
-						});
-
-					};
-
-					// validate assetType
-					if(!type.match(/^(Image|Video|Text)$/)) {
-						res.status(422).json({
+		(new Submission(articleSubmissionID)).load().then((sub) => {
+			if (!sub || sub.userID != userID) {
+				console.log('@@@@ Failed to find submission')
+				res.status(404).json({
+					success: false,
+					errors: [{title: "The provided articleSubmissionID ("+articleSubmissionID+") is invalid or is not editable by this userID ("+userID+")."}]
+				});
+			} else {
+				// parse form
+				var form = new formidable.IncomingForm();
+				form.multiples = false;
+				form.parse(req, function (err, fields, files) {
+					if (err) {
+						console.error(err);
+						console.error(err.stack);
+						res.status(500).json({
 							success: false,
-							errors: "Invalid asset type specified ("+fields['type']+") -- needs to be Image, Video, or Text"
+							errors: [{title: "Error while parsing user form."}]
 						});
-					}
-
-					else {
-
-						// flag to figure out if the user uploaded a file or provided a URL
-						var url = false;
-
-						// intiialize shared vars
-						var ext = null,
-							filename = null,
-							timestamp = Math.floor(Date.now() / 1000);
-						var prefix = timestamp.toString();
-
-
-						// user provided URL to asset
-						if (fields['url']) {
-
-							url = fields['url'];
-
-							// ensure the URL has a proper filename
-							ext = url.split('.').pop();
-
-							if(!ext.match(/^(jpg|jpeg|gif|png)$/i)) {
-								res.status(422).json({
-									success: false,
-									errors: "Invalid file reference extension from URL ("+url+")"
-								});
-							}
-
-							else {
-
-								// copy remote file to local storage (todo: this will be s3)
-								filename = url.split('/').pop();
-								var curl = fs.createWriteStream(path.join(storageDir, prefix+filename));
-
-								http.get(url, function(response) {
-
-									// todo: error handling
-
-									response.pipe(curl);
-
-									// build record to be inserted
-
-									var submissionAsset = {
-										articleSubmissionID: articleSubmissionID,
-										caption: (fields['caption']) ? fields['caption'] : '',
-										assetType: type,
-										assetPath: prefix+filename
-									};
-
-									insertRecord(submissionAsset);
-								});
-
-
-
-							}
-
-						}
-
-						// process file upload
-						else {
-
-							// there must be at least one file posted
-							if (Object.keys(files).length > 0 && files['assetfile']) {
-
-								var assetfile = files['assetfile'];
-
-								// get file extension of upload
-								ext = assetfile.name.split('.').pop();
-
-								// make sure this file has a valid extension
-								if(!ext.match(/^(jpg|jpeg|gif|png)$/i)) {
+					} else {
+						let type = (fields['type']) ? fields['type'] : '';
+						// validate assetType
+						if (!type.match(/^(Image|Video|Text)$/)) {
+							res.status(422).json({
+								success: false,
+								errors: [{title: "Invalid asset type specified ("+fields['type']+") -- needs to be Image, Video, or Text"}]
+							});
+						} else {
+							let url = fields['url'];
+							// intiialize shared vars
+							let timestamp = Math.floor(Date.now() / 1000);
+							let prefix = timestamp.toString();
+							// user provided URL to asset
+							if (fields['url']) {
+								// ensure the URL has a proper filename
+								let ext = url.split('.').pop();
+								if (!ext.match(/^(jpg|jpeg|gif|png)$/i)) {
 									res.status(422).json({
 										success: false,
-										errors: "Invalid file upload extension ("+ext+")"
+										errors: [{title: "Invalid file reference extension from URL ("+url+")"}]
+									});
+								} else {
+									let filename = url.split('/').pop();
+									let destination = path.join(storageDir, prefix+filename);
+									(Asset.copy_url_to_storage(url, destination)).then(async () => {
+										let submissionAsset = {
+											articleSubmissionID: articleSubmissionID,
+											caption: (fields['caption']) ? fields['caption'] : '',
+											assetType: type,
+											assetPath: prefix+filename
+										};
+										let a = await (new Asset()).set(submissionAsset).create();
+										res.status(200).json({
+											success: true,
+											data: submissionAsset,
+											insertId: a.id
+										});
+								}).catch((err) => {
+										console.error('#### Error in processing upload.');
+										res.status(200).json({
+											success: false,
+											errors: [{title: "Error while inserting new asset record."}]
+										});
 									});
 								}
-
-								else {
-
-									// build destination path (within admin container) and filename
-									form.uploadDir = storageDir;
-									var oldpath = assetfile.path;
-									filename = timestamp.toString() + assetfile.name;
-									var fullpath = path.join(storageDir, prefix+filename);
-
-									// console.log('@@@@ Writing file to ' + fullpath);
-
-									// copy file out of temp
-									const env = process.env.NODE_ENV || 'development';
-									// console.log('@@@@ Node env: ',env);
-									// console.log('@@@@ Copying file from ',oldpath,' to ',fullpath);
-									// console.log('@@@@ storageDir: ',storageDir,' prefix: ',prefix);
-									fs.copy(oldpath, fullpath, function (err) {
-
-										if (err) {
-											console.error(err);
-											console.error(err.stack);
-											res.status(500).json({
-												success: false,
-												errors: "Error while writing file upload (" + fullpath + ")"
-											});
-										}
-
-										else {
-
-											// build public URL todo: move the prefix to ENV or config file
-											url = filename;
-
-											// test to ensure that file is publicly accessible
-
-											// build record to be inserted
+							} else {
+								// Process file upload
+								// there must be at least one file posted
+								if (Object.keys(files).length > 0 && files['assetfile']) {
+									let assetfile = files['assetfile'];
+									// get file extension of upload
+									let ext = assetfile.name.split('.').pop();
+									// make sure this file has a valid extension
+									if (!ext.match(/^(jpg|jpeg|gif|png)$/i)) {
+										res.status(422).json({
+											success: false,
+											errors: [{title: "Invalid file upload extension ("+ext+")"}]
+										});
+									} else {
+										// build destination path (within admin container) and filename
+										form.uploadDir = storageDir;
+										let oldpath = assetfile.path;
+										let filename = timestamp.toString() + assetfile.name;
+							 			let fullpath = path.join(storageDir, prefix+filename);
+										// copy file out of temp
+										Asset.copy_local_file(oldpath, fullpath).then(async () => {
 											var submissionAsset = {
 												articleSubmissionID: articleSubmissionID,
 												caption: (fields['caption']) ? fields['caption'] : '',
 												assetType: type,
 												assetPath: prefix+filename
 											};
-
-											insertRecord(submissionAsset);
-										}
-
-									});
+											let a = await (new Asset()).set(submissionAsset).create();
+											res.status(200).json({
+												success: true,
+												data: submissionAsset,
+												insertId: a.id
+											});
+										}).catch((err) => {
+											console.error(err);
+											console.error(err.stack);
+											res.status(500).json({
+												success: false,
+												errors: [{title: "Error while writing file upload (" + fullpath + ")"}]
+											});
+										});
+									}
 								}
-
-							}
-							else {
-								res.status(422).json({
-									success: false,
-									errors: "No valid URL or file upload provided"
-								});
 							}
 						}
-
-
 					}
-
-				}
-
-			});
-		}
-	});
-
+				});
+			}
+		});
+	} catch (err) {
+		console.error('#### Error in server: ',err);
+		res.status(500).json({errors: [{title: 'Server error'}]});
+	}
 });
 
 
@@ -853,32 +730,36 @@ router.post('/articles/:article/submissions/:id/asset/new', h.ensureLogin,
  * @author Ray Dollete <ray@raydollete.com>
  */
 router.delete('/articles/:article/submissions/:sub/asset/:id', h.ensureLogin, function(req, res) {
+	try {
+		const userID = req.user.userID;
+		const articleID = req.params.article;
+		const subID = req.params.sub; // do we want to use this for additional precaution?
+		const assetID = req.params.id;
 
-	const userID = req.user.userID;
-	const articleID = req.params.article;
-	const subID = req.params.sub; // do we want to use this for additional precaution?
-	const assetID = req.params.id;
-
-	(new Submission(subID)).assets_for_user(userID).then((assets) => {;
-		let promises = []
-		for (let a of assets) {
-			if (a.id == assetID) {
-			 	promises.push(a.delete());
+		(new Submission(subID)).assets_for_user(userID).then((assets) => {;
+			let promises = []
+			for (let a of assets) {
+				if (a.id == assetID) {
+				 	promises.push(a.delete());
+				}
 			}
-		}
-		Promise.all(promises).then(() => {
-			res.status(200).json({
-				success: true,
-				affectedRows: assets.length,
-			});
-		}).catch((err) => {
-			console.error('#### Error in deleteing assets for user', err);
-			res.status(500).json({
-				success: false,
-				errors: "Error deleting assets."
-			});
-		})
-	});
+			Promise.all(promises).then(() => {
+				res.status(200).json({
+					success: true,
+					affectedRows: assets.length,
+				});
+			}).catch((err) => {
+				console.error('#### Error in deleteing assets for user', err);
+				res.status(500).json({
+					success: false,
+					errors: [{title: "Error deleting assets."}]
+				});
+			})
+		});
+	} catch (err) {
+		console.error('#### Server error: ',err);
+		res.status(500).json({success: false, errors: [{title: 'Server error'}]})
+	}
 });
 
 

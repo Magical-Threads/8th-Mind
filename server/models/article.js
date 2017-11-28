@@ -114,6 +114,8 @@ class Article extends Base {
         if (err) {
           console.error('#### Error in query for article: ',err);
           reject(err);
+        } else if (result && result.length < 1) {
+          resolve(null);
         } else {
           let names = fields.map(f => f.name);
           for (let n of names) {
