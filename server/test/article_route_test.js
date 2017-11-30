@@ -299,6 +299,46 @@ describe('article routes', function() {
         //   throw err;
         })
       });
+      it('should be able to add assets to a submission that already has assets', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id
+        });
+        sub = await sub.create();
+        let asset = await chai.request(a)
+        .post('/articles/53/submissions/'+sub.id+'/asset/new')
+        .set('authorization', u.token)
+        .field('caption', 'TESTING')
+        .field('type', 'Image')
+        .attach('assetfile', fs.readFileSync(path.join(__dirname, 'KoLinaBeach.png')), 'KoLinaBeach.png')
+        .then(async (res) => {
+          expect(res.status).to.equal(200);
+          let assets = await sub.assets();
+          expect(assets.length).to.equal(1);
+          expect(assets[0].assetPath).to.endWith('KoLinaBeach.png');
+          expect(fs.existsSync(path.join(config.storageDir,assets[0].assetPath))).to.be.true;
+          return assets[0];
+        });
+        let asset2 = await chai.request(a)
+        .post('/articles/53/submissions/'+sub.id+'/asset/new')
+        .set('authorization', u.token)
+        .field('caption', 'TESTING')
+        .field('type', 'Image')
+        .attach('assetfile', fs.readFileSync(path.join(__dirname, 'KoLinaBeach2.png')), 'KoLinaBeach2.png')
+        .then(async (res) => {
+          expect(res.status).to.equal(200);
+          let assets = await sub.assets();
+          expect(assets.length).to.equal(2);
+          expect(assets[0].assetPath).to.endWith('KoLinaBeach.png');
+          expect(assets[1].assetPath).to.endWith('KoLinaBeach2.png');
+          expect(fs.existsSync(path.join(config.storageDir,assets[0].assetPath))).to.be.true;
+          return assets[1];
+        });
+      });
       it('should be able to remove assets from a submission', async function() {
         let u = await User.login(support.test_users.fred.userEmail, 'wilma');
         let article = await (new Article(53)).load();
