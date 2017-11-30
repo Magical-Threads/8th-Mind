@@ -37,8 +37,9 @@ export default Ember.Component.extend({
 			let model = this.get('model');
 			// let serverPath = this.get('serverPath');
 			let submissionTitle = this.get('submissionTitle');
-
-			let rec = store.createRecord('submission', {title: submissionTitle});
+			let auth = this.get('session.data.authenticated');
+			let rec = store.createRecord('submission', {title: submissionTitle,
+				name: auth.userFirstName+' '+auth.userLastName});
 			model.article.get('submissions').pushObject(rec);
 			await rec.save({adapterOptions: {articleID: model.get('article.id')}})
 			.then(() => {
