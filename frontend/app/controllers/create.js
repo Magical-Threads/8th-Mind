@@ -4,7 +4,7 @@ import config from './../config/environment';
 export default Ember.Controller.extend({
 	serverURL: config.serverPath,
 	rootUrl: config.rootURL,
-	querParams: [
+	queryParams: [
 		'page',
 	],
 	page: 1,
