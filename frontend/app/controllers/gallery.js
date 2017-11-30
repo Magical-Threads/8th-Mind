@@ -5,10 +5,19 @@ export default Ember.Controller.extend({
 	session: Ember.inject.service('session'),
 	serverURL: config.serverPath,
 	rootUrl: config.rootURL,
-	querParams:[
+	queryParams:[
 		'page',
 	],
 	page: 1,
+	userSubmission: Ember.computed('session.data.authenticated', function() {
+		// Locate any existing submission for the logged in user
+		let auth = this.get('session.data.authenticated');
+		let subs = this.get('model.article.submissions');
+		if (auth && subs && subs.length > 0) {
+			return subs.find(s => s.userID == auth.userID);
+		}
+		return null;
+	}),
 	actions: {
 		showGallerySubmission() {
 			Ember.$('#button-show-upload').hide();

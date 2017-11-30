@@ -12,8 +12,8 @@
 				{{#link-to "article" model.article.id}} Back to the Challenge {{/link-to}}
 				{{#if model.article.allowSubmission}}
 					<button id="button-show-upload" type="button" class="button button-blue"
-						{{action "showGallerySubmission"}}>Create Your Submission</button>
-					{{challenge-submit model=model store=store}}
+						{{action "showGallerySubmission"}}>{{#if userSubmission}}Add to Your Submission{{else}}Create Your Submission{{/if}}</button>
+					{{challenge-submit model=model store=store submission=userSubmission}}
 				{{/if}}
 			</div>
 
@@ -26,7 +26,7 @@
 						<h4 class='title'>{{model.article.title}} gallery</h4>
 						<button id="button-show-upload" type="button"
 							class="button button-blue" {{action "showGallerySubmission"}}
-							>Create Your Submission</button>
+							>{{#if userSubmission}}Add to Your Submission{{else}}Create Your Submission{{/if}}</button>
 					</div>
 				</div> --}}
 				{{log model}}

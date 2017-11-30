@@ -37,12 +37,17 @@ export default Ember.Component.extend({
 		async beforeUpload(store) {
 			this.set('errors', Ember.A());
 			let model = this.get('model');
+			let submission = this.get('submission');
 			// let serverPath = this.get('serverPath');
-			let submissionTitle = this.get('submissionTitle');
+			let submissionTitle = this.get('submissionTitle') ||
+				(this.get('submission.isDeleted') ? null : this.get('submission.title'));
 			if (!submissionTitle || submissionTitle.length < 3) {
 				console.log('@@@@ Submission title too short: ',submissionTitle);
 				this.set('errors', Ember.A(['Title must have at least 3 characters']));
 				return false;
+			} else if (submission != null && !submission.get('isDeleted')) {
+				this.set('errors', Ember.A());
+				return true;
 			} else {
 				let auth = this.get('session.data.authenticated');
 				let rec = store.createRecord('submission', {title: submissionTitle,

@@ -1,7 +1,11 @@
+{{#if (and submission (not submission.isDeleted))}}
+	{{submission.title}}
+{{else}}
 <div class="form-group">
 	<label for="title">Title</label>
 	{{input name="title" type="text" value=submissionTitle}}
 </div>
+{{/if}}
 <div class="form-group">
 	<label for="caption">Caption</label>
 	{{input name="caption" type="text" value=assetCaption}}
