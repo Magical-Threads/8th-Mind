@@ -16,6 +16,8 @@
 
 <!-- <button id="button-submit" {{!action 'createSubmission' store}}
 	type="button" class="button button-teal hidden">Submit</button> -->
-{{#each model.errors as |err|}}
-	{{#if err.title}}{{err.title}}{{/if}}
+<ul>
+{{#each errors as |err|}}
+	<li>{{#if err.title}}{{err.title}}{{else}}{{err}}{{/if}}</li>
 {{/each}}
+</ul>

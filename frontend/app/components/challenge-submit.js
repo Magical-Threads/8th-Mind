@@ -13,6 +13,7 @@ export default Ember.Component.extend({
 	submissionTitle: null,
 	assetCaption: null,
 	submission: null,
+	errors: Ember.A(),
 	assetCaptionData: Ember.computed('assetCaption', 'submissionTitle', function() {
 		return {
 			caption: this.get('assetCaption'),
@@ -34,26 +35,36 @@ export default Ember.Component.extend({
 	actions: {
 		// Before performing the upload craete the submission
 		async beforeUpload(store) {
+			this.set('errors', Ember.A());
 			let model = this.get('model');
 			// let serverPath = this.get('serverPath');
 			let submissionTitle = this.get('submissionTitle');
-			let auth = this.get('session.data.authenticated');
-			let rec = store.createRecord('submission', {title: submissionTitle,
-				name: auth.userFirstName+' '+auth.userLastName});
-			model.article.get('submissions').pushObject(rec);
-			await rec.save({adapterOptions: {articleID: model.get('article.id')}})
-			.then(() => {
-				// Save succeeded - save the asset
-				console.log('@@@@ Submision saved to id: ',rec.get('id'));
-				console.log('@@@@ Asset caption data: ',this.get('assetCaptionData'))
-				this.set('submission', rec);
-			}).catch((err) => {
-				// Save failed with error
-				console.error('#### Error in save ',err);
-				console.error('#### Submission errors: ',rec.get('errors').toArray());
-				console.error('#### Submission isValid: ',rec.get('isValid'))
-				this.set('errors', err.errors);
-			});
+			if (!submissionTitle || submissionTitle.length < 3) {
+				console.log('@@@@ Submission title too short: ',submissionTitle);
+				this.set('errors', Ember.A(['Title must have at least 3 characters']));
+				return false;
+			} else {
+				let auth = this.get('session.data.authenticated');
+				let rec = store.createRecord('submission', {title: submissionTitle,
+					name: auth.userFirstName+' '+auth.userLastName});
+				model.article.get('submissions').pushObject(rec);
+				return await rec.save({adapterOptions: {articleID: model.get('article.id')}})
+				.then(() => {
+					// Save succeeded - save the asset
+					console.log('@@@@ Submision saved to id: ',rec.get('id'));
+					console.log('@@@@ Asset caption data: ',this.get('assetCaptionData'));
+					this.set('errors', Ember.A());
+					this.set('submission', rec);
+					return true;
+				}).catch((err) => {
+					// Save failed with error
+					console.error('#### Error in save ',err);
+					console.error('#### Submission errors: ',rec.get('errors').toArray());
+					console.error('#### Submission isValid: ',rec.get('isValid'))
+					this.set('errors', Ember.A(err.errors));
+					return false;
+				});
+			}
 		},
 		// On upload success refresh view
 		async uploadSuccess(store, data) {
@@ -81,7 +92,7 @@ export default Ember.Component.extend({
 		// On upload failure display errors
 		async uploadError(err) {
 			console.log('#### Erorr in upload: ',err);
-			this.set('errors', err.errors);
+			this.set('errors', Ember.A(err.errors));
 		}
 	}
 });
