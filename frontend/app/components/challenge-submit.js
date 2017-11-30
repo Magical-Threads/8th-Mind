@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import ENV from 'frontend/config/environment'
+import config from './../config/environment';
 
 /* global jQuery */
 
@@ -54,12 +55,32 @@ export default Ember.Component.extend({
 			});
 		},
 		// On upload success refresh view
-		async uploadSuccess(data) {
-			console.log('@@@@ Successful upload: ',data);
+		async uploadSuccess(store, data) {
+			console.log('@@@@ Successful upload: ',data,' submission: ',this.get('submission'));
+			// side load asset
+			let asset = data.data;
+			asset.articleSubmissionAssetID = data.insertId;
+			asset.id = data.insertId;
+			store.push({data: {
+				attributes: {
+					id: 			data.insertId,
+					caption: 	asset.caption,
+					type: 		asset.assetType,
+					image: 		`${config.serverPath}storage/submission/photo/${asset.assetPath}`,
+					assetID: 	asset.articleSubmissionAssetID
+				},
+				type: 'asset',
+				id: data.insertId
+			}});
+			let a = store.peekRecord('asset', data.insertId);
+			console.log('@@@@ Pushed ',asset,' got: ',a);
+			console.log('@@@@ SUbmission: ',this.get('submission'),' assets: ',this.get('submission.assets'));
+			this.get('submission.assets').pushObject(a);
 		},
 		// On upload failure display errors
 		async uploadError(err) {
 			console.log('#### Erorr in upload: ',err);
+			this.set('errors', err.errors);
 		}
 	}
 });

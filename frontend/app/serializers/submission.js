@@ -24,7 +24,7 @@ export default DS.RESTSerializer.extend({
 		}};
 	},
 	normalizeFindRecordResponse(store, primaryModelClass, payload, id, requestType) {
-		// console.log('@@@@ findRecord submission response: ',payload,' for: ',id);
+		console.log('@@@@ findRecord submission response: ',payload,' for: ',id,' requestType: ',requestType);
 		if (Array.isArray(payload) && payload.length > 0) {
 			payload = { submission: payload.map(this.mapSubmissions)[0] };
 			return this._super(store, primaryModelClass, payload, id, requestType);

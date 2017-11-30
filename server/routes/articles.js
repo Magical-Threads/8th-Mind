@@ -386,7 +386,23 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 		var createdAt = new Date();
 
 		(new Article(articleID)).load().then(async (article) => {
+			if (!article) {
+				res.status(404).json({
+					success: false,
+					errorCode: 1,
+					errors: [{title: "The provided articleID ("+articleID+") is invalid."}]
+				});
+				return;
+			}
 			let user = await (new User(userID)).load();
+			if (!user) {
+				res.status(404).json({
+					success: false,
+					errorCode: 1,
+					errors: [{title: "The provided userID ("+userID+") is invalid."}]
+				});
+				return;
+			}
 			let submission = await article.submission_for_user(user);
 
 			// no article found
@@ -450,9 +466,12 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 					});
 				}
 			}
+		}).catch((err) => {
+			console.error('#### Error in creating submission: ',err);
+			res.status(500).json({errors: [{title: 'Server error'}]});
 		});
 	} catch (err) {
-		console.error('#### Server error: ',err);
+		console.error('#### Error in creating submission: ',err);
 		res.status(500).json({errors: [{title: 'Server error'}]});
 	}
 });

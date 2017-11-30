@@ -71,6 +71,9 @@ applications will be accessible as follows:
 * if a more up-to-date mysqldump is available, replace the one in ./docker-entrypoint-initdb.d/content_portal.sql
 * run `docker-compose up -d` to start the containers in detached mode
 
+* The current docker-compose.yml maps the port for mysql to that of the host machine.  This allows development to access the database directly as needed for testing.  But,
+should be blocked by firewall on any production server to prevent outside access.
+
 ### Front-end
 
 * `cd frontend`
@@ -97,6 +100,9 @@ back-end, or [server] for API) as appropriate:
 * `docker-compose rm -f [container]`
 * `docker-compose up -d`
 
+The above can also be accessed by using the rebuild.sh to rebuild a single server, or
+rebuild-all.sh to rebuild all servers.
+
 ### Front-end
 
 * `git pull`
@@ -104,4 +110,3 @@ back-end, or [server] for API) as appropriate:
 * `npm install`
 * `bower install`
 * `ember build --environment production`
-

@@ -20,7 +20,7 @@ export default Ember.Component.extend({
 			// store.findRecord('submission', submissionID, { backgroundReload: false })
 			// .then(submission => {
 				// console.log({submission})
-				submission.destroyRecord({ adapterOptions: { articleID: article.id, submissionID: submission.id, assetID: asset.id }, backgoundReload: false});
+				asset.destroyRecord({ adapterOptions: { articleID: article.id, submissionID: submission.id, assetID: asset.id }, backgoundReload: false});
 			// });
 		},
 		handleUpvote() {

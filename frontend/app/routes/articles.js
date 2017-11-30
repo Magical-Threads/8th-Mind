@@ -23,8 +23,8 @@ export default Ember.Route.extend(ResetScrollMixin, {
 	model: function(params) {
 
 		var url = (params['page']) ?
-			config.serverPath + 'articles/?page=' + params['page'] :
-			config.serverPath + 'articles/';
+			config.serverPath + 'articles/?tag=Article&page=' + params['page'] :
+			config.serverPath + 'articles/?tag=Article';
 
 		return Ember.$.ajax({
 			method: 'GET',
@@ -33,7 +33,7 @@ export default Ember.Route.extend(ResetScrollMixin, {
 
 			let articleCategories = result
 				.result
-				.filter(categories => categories.articleTags === 'Article');
+				// .filter(categories => categories.articleTags === 'Article');
 
 			return Ember.RSVP.hash({
 				articles: articleCategories,

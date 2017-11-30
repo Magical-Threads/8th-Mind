@@ -7,8 +7,8 @@
 			<div class="challenge-submission-img" data-asset-id={{asset.id}}>
 				{{#if session.success}}
 					{{#if (eq submission.userID session.userID)}}
-						<div class="challenge-submission-edit">
-							<button class='delete' {{action 'deleteAsset' article submission asset store}}>Delete</button>
+						<div class="challenge-submission-asset-edit">
+							<button class='delete' {{action 'deleteAsset' article submission asset store}}>Delete Asset</button>
 						</div>
 					{{/if}}
 				{{/if}}
@@ -63,6 +63,10 @@
 		{{/if}}
 	{{/if}}
 
+	{{#each submission.errors as |err|}}
+		{{#if err.title}}{{err.title}}{{/if}}
+	{{/each}}
 </div>
+
 
 {{yield}}

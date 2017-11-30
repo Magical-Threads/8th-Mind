@@ -17,14 +17,15 @@ export default Ember.Route.extend(ResetScrollMixin, {
 	model: function(params) {
 
 		var url = (params['page']) ?
-			config.serverPath + 'articles/?page=' + params['page'] :
-			config.serverPath + 'articles/';
-		
+			config.serverPath + 'articles/?tag=Create&page=' + params['page'] :
+			config.serverPath + 'articles/?tag=Create';
+
 		return Ember.$.ajax({
 			method: "GET",
 			url: url,
 		}).then((result) => {
-			let createCategories = result.result.filter(categories => categories.articleTags === 'Create');
+			let createCategories = result.result
+			// .filter(categories => categories.articleTags === 'Create');
 			return Ember.RSVP.hash({
 				articles: createCategories,
 				pagination: result.pagination

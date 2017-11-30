@@ -1,24 +1,18 @@
-<!-- <form id="add-submission" method="POST"> -->
-	<div class="form-group">
-		<label for="title">Title</label>
-		{{input name="title" type="text" value=submissionTitle}}
-	</div>
-<!-- </form>
-<form id="add-asset" method="POST"> -->
+<div class="form-group">
+	<label for="title">Title</label>
+	{{input name="title" type="text" value=submissionTitle}}
+</div>
 <div class="form-group">
 	<label for="caption">Caption</label>
 	{{input name="caption" type="text" value=assetCaption}}
 </div>
-	<div class="form-group">
-		<!-- <label for="assetFile">File Upload</label> -->
-		{{!nput name="assetFile" type="file" id="assetFile"}}
-		{{upload-field url=assetUploadURL extraData=assetCaptionData
-			fileParamName='assetfile' ajaxSettings=ajaxSettings
-			success=(action 'uploadSuccess') error=(action 'uploadError')
-			preAction=(action 'beforeUpload' store)
-		}}
-	</div>
-<!-- </form> -->
+<div class="form-group">
+	{{upload-field url=assetUploadURL extraData=assetCaptionData
+		fileParamName='assetfile' ajaxSettings=ajaxSettings
+		success=(action 'uploadSuccess' store) error=(action 'uploadError')
+		preAction=(action 'beforeUpload' store)
+	}}
+</div>
 
 <!-- <button id="button-submit" {{!action 'createSubmission' store}}
 	type="button" class="button button-teal hidden">Submit</button> -->

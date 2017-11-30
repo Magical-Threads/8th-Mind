@@ -17,16 +17,17 @@ export default Ember.Route.extend(ResetScrollMixin, {
 	model: function(params) {
 
 		var url = (params['page']) ?
-			config.serverPath + 'articles/?page=' + params['page'] :
-			config.serverPath + 'articles/';
-		
+			config.serverPath + 'articles/?tag=Challenge&page=' + params['page'] :
+			config.serverPath + 'articles/?tag=Challenge';
+
 		return Ember.$.ajax({
 			method: "GET",
 			url: url,
 		}).then((result) => {
 
-			let challengeCategories = result.result.filter(categories => categories.articleTags === 'Challenge');
-			
+			let challengeCategories = result.result
+			// .filter(categories => categories.articleTags === 'Challenge');
+
 			return Ember.RSVP.hash({
 				hasChallenges: challengeCategories.length > 0,
 				articles: challengeCategories,
