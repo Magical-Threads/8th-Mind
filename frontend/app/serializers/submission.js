@@ -2,7 +2,7 @@ import DS from 'ember-data';
 
 export default DS.RESTSerializer.extend({
 	mapSubmissions(submission) {
-		console.log('@@@@ Normalizing submission: ',submission);
+		// console.log('@@@@ Normalizing submission: ',submission);
 		return {
 			id: 			    submission.articleSubmissionID,
 			title: 			  submission.title,
@@ -27,7 +27,7 @@ export default DS.RESTSerializer.extend({
 		}};
 	},
 	normalizeFindRecordResponse(store, primaryModelClass, payload, id, requestType) {
-		console.log('@@@@ findRecord submission response: ',payload,' for: ',id,' requestType: ',requestType);
+		// console.log('@@@@ findRecord submission response: ',payload,' for: ',id,' requestType: ',requestType);
 		if (Array.isArray(payload) && payload.length > 0) {
 			payload = { submission: payload.map(this.mapSubmissions)[0] };
 			return this._super(store, primaryModelClass, payload, id, requestType);
@@ -46,7 +46,7 @@ export default DS.RESTSerializer.extend({
 		return this._super(store, primaryModelClass, payload, id, requestType);
 	},
 	normalizeSaveResponse(store, primaryModelClass, payload, id, requestType) {
-		console.log('@@@@ Save response payload: ',payload,' id: ',id, ' requestType: ',requestType);
+		// console.log('@@@@ Save response payload: ',payload,' id: ',id, ' requestType: ',requestType);
 		if (requestType === 'createRecord') {
 			return {data: {
 				type: 'submission',

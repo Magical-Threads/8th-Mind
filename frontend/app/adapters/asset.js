@@ -3,7 +3,7 @@ import ApplicationAdapter from './application';
 export default ApplicationAdapter.extend({
 	buildURL(modelName, id, snapshot, requestType, query) {
 
-		console.log('asset apdapter',{modelName, id, snapshot, requestType, query})
+		// console.log('asset apdapter',{modelName, id, snapshot, requestType, query})
 
 		if (requestType === 'deleteRecord') {
 
@@ -30,7 +30,7 @@ export default ApplicationAdapter.extend({
 		}
 	},
 	handleResponse(status, headers, payload, requestData) {
-		console.log('@@@@ In handle response. Asset  Status: ',status,' headers: ',headers,' payload: ',payload);
+		// console.log('@@@@ In handle response. Asset  Status: ',status,' headers: ',headers,' payload: ',payload);
 		if (payload && payload.success) {
 			if (payload.result) {
 				return payload.result;

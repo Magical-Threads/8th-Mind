@@ -3,7 +3,7 @@ import config from './../config/environment';
 
 export default DS.RESTSerializer.extend({
 	normalizeResponse (store, primaryModelClass, payload, id, requestType) {
-		console.log('@@@@ Normalize response: ',payload);
+		// console.log('@@@@ Normalize response: ',payload);
 		if (payload.assets) {
 			payload = {
 				assets: payload.assets.map(asset => {

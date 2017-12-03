@@ -29,7 +29,7 @@
 	<div class="challenge-submission-upvote">
 		{{#if article.allowVoting}}
 			{{#if session.success}}
-				<span class="upvote-counter" {{action "handleUpvote" submission}}>
+				<span class="upvote-counter" {{action "handleUpvote" article submission}}>
 					{{submission.votes}}
 					<i class="icon-heart">
 						<svg viewBox="0 0 96.6 85.1">

@@ -42,7 +42,7 @@ export default Ember.Component.extend({
 			let submissionTitle = this.get('submissionTitle') ||
 				(this.get('submission.isDeleted') ? null : this.get('submission.title'));
 			if (!submissionTitle || submissionTitle.length < 3) {
-				console.log('@@@@ Submission title too short: ',submissionTitle);
+				// console.log('@@@@ Submission title too short: ',submissionTitle);
 				this.set('errors', Ember.A(['Title must have at least 3 characters']));
 				return false;
 			} else if (submission != null && !submission.get('isDeleted')) {
@@ -56,8 +56,8 @@ export default Ember.Component.extend({
 				return await rec.save({adapterOptions: {articleID: model.get('article.id')}})
 				.then(() => {
 					// Save succeeded - save the asset
-					console.log('@@@@ Submision saved to id: ',rec.get('id'));
-					console.log('@@@@ Asset caption data: ',this.get('assetCaptionData'));
+					// console.log('@@@@ Submision saved to id: ',rec.get('id'));
+					// console.log('@@@@ Asset caption data: ',this.get('assetCaptionData'));
 					this.set('errors', Ember.A());
 					this.set('submission', rec);
 					return true;
@@ -73,7 +73,7 @@ export default Ember.Component.extend({
 		},
 		// On upload success refresh view
 		async uploadSuccess(store, data) {
-			console.log('@@@@ Successful upload: ',data,' submission: ',this.get('submission'));
+			// console.log('@@@@ Successful upload: ',data,' submission: ',this.get('submission'));
 			// side load asset
 			let asset = data.data;
 			asset.articleSubmissionAssetID = data.insertId;
@@ -90,8 +90,8 @@ export default Ember.Component.extend({
 				id: data.insertId
 			}});
 			let a = store.peekRecord('asset', data.insertId);
-			console.log('@@@@ Pushed ',asset,' got: ',a);
-			console.log('@@@@ SUbmission: ',this.get('submission'),' assets: ',this.get('submission.assets'));
+			// console.log('@@@@ Pushed ',asset,' got: ',a);
+			// console.log('@@@@ SUbmission: ',this.get('submission'),' assets: ',this.get('submission.assets'));
 			this.get('submission.assets').pushObject(a);
 		},
 		// On upload failure display errors

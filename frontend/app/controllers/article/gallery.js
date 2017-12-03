@@ -14,9 +14,9 @@ export default Ember.Controller.extend({
 		// Locate any existing submission for the logged in user
 		let auth = this.get('session.data.authenticated.userID');
 		let subs = this.get('model.article.submissions');
-    console.log('@@@@ Auth: ',auth,' subs: ',subs.map(s => s.get('userID')));
+    // console.log('@@@@ Auth: ',auth,' subs: ',subs.map(s => s.get('userID')));
 		if (auth && subs) {
-      console.log('@@@@ Sub user ids: ',subs.map(s => s.get('userID')));
+      // console.log('@@@@ Sub user ids: ',subs.map(s => s.get('userID')));
 			return subs.find(s => s.get('userID') === auth && !s.get('isDeleted'));
 		}
 		return null;
