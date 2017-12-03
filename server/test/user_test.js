@@ -1,11 +1,17 @@
-let mocha = require('mocha');
-let chai = require('chai');
-let expect = chai.expect;
-let chaiHttp = require('chai-http');
+const mocha = require('mocha');
+const chai = require('chai');
+const expect = chai.expect;
+const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
-let User = require('../models/user');
+const support = require('./support');
+
+const User = require('../models/user');
 
 describe('Users', function() {
+  before(async function() {
+    await support.clear_users();
+    await support.register_users();
+  });
   describe('Accessors', function() {
     it('should be able to return the id for the user', function() {
       let u = new User(10);
@@ -20,6 +26,27 @@ describe('Users', function() {
       let u = new User(100);
       u.add_error('TESTING');
       expect(u.errors).to.deep.equal(['TESTING'])
+    });
+    it('should be able to record user avatar, bio URL and location fields', async function() {
+      let u = await (await User.find(support.test_users.fred.userEmail)).set({
+        avatar: '',
+        bio: 'I was a quary employee for many years.',
+        url: '',
+        location: 'bedrock'
+      }).save();
+      expect(u.userFirstName).to.equal(support.test_users.fred.userFirstName);
+      expect(u.userLastName).to.equal(support.test_users.fred.userLastName);
+      expect(u.avatar).to.equal('');
+      expect(u.bio).to.equal('I was a quary employee for many years.');
+      expect(u.url).to.equal('');
+      expect(u.location).to.equal('bedrock');
+      let u2 = await (new User(u.id)).load();
+      expect(u2.userFirstName).to.equal(support.test_users.fred.userFirstName);
+      expect(u2.userLastName).to.equal(support.test_users.fred.userLastName);
+      expect(u2.avatar).to.equal('');
+      expect(u2.bio).to.equal('I was a quary employee for many years.');
+      expect(u2.url).to.equal('');
+      expect(u2.location).to.equal('bedrock');
     });
   });
   describe('Security functions', function() {

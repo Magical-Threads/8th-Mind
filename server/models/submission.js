@@ -37,7 +37,7 @@ class Submission extends Base {
    */
   async load() {
     return new Promise((resolve, reject) => {
-      db.query("SELECT *, "+
+      db.query("SELECT S.*, "+
         " IF(U.displayName IS NULL, CONCAT(U.userFirstName, ' ', U.userLastName), U.displayName)" +
     		"	  AS `userDisplayName` " +
         "	FROM article_submission S" +
@@ -50,18 +50,6 @@ class Submission extends Base {
             reject(err);
           } else if (result && result.length > 0) {
             let sub = this.set(result[0]);
-            // Delete user fields we do not want
-            delete sub.displayName;
-            delete sub.emailConfirmationToken;
-            delete sub.lastLogin;
-            delete sub.emailStatus;
-            delete sub.passwordResetToken;
-            delete sub.userFirstName;
-            delete sub.userLastName;
-            delete sub.userEmail;
-            delete sub.userPassword;
-            delete sub.userRole;
-            delete sub.userStatus;
             resolve(sub);
           } else {
             this._errors = ['Submission not found'];

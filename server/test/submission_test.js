@@ -40,7 +40,6 @@ describe('Submission', function() {
     sub.status = sub2.status;
     sub.thumbUrl = sub2.thumbUrl;
     sub.createdAt = sub2.createdAt;
-    sub.updatedAt = sub2.updatedAt;
     sub.userDisplayName = sub2.userDisplayName;
     expect(sub2.serialized).to.deep.equal(sub.serialized);
   });

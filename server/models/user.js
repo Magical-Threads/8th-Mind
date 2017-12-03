@@ -206,16 +206,33 @@ class User extends Base {
    * @return {boolean} - True for succesful subscription
    */
   async subscribe() {
-    db.query("SELECT * FROM subscribers WHERE subscribeEmail = '"+params.userEmail+"'", function (err, suser) {
-        if (suser.length==0)
-         {
-            var ins={
-             subscribeEmail:params.userEmail,
-             createdAt:createdAt,
-            };
-db.query('INSERT INTO subscribers SET ?',ins, function (err, result) { });
-}
-});
+    return new Promise((resolve, reject) => {
+      db.query("SELECT * FROM subscribers WHERE subscribeEmail = ?", this.userEmail,
+        function (err, suser) {
+        if (err) {
+          console.error('#### Error in subscribing user', err);
+          return reject(err);
+        }
+        if (suser.length==0) {
+          var ins={
+            subscribeEmail:this.userEmail,
+            createdAt:createdAt,
+          };
+          db.query('INSERT INTO subscribers SET ?', ins, function (err, result) {
+            if (err) {
+              console.error('#### Error in subscribing user', err);
+              return reject(err);
+            }
+            if (result.affectedRows==1) {
+              resolve();
+            } else {
+              console.error('#### Failed to insert subscription for user ',this.userEmail, result);
+              reject('Failed to subscribe user');
+            }
+          });
+        }
+      });
+    });
   }
   /**
    * Add an error to the user object.
@@ -229,6 +246,25 @@ db.query('INSERT INTO subscribers SET ?',ins, function (err, result) { });
       this._errors = [msg];
     }
     return this;
+  }
+  /**
+   * Modify profile fields of user.
+   */
+  async save() {
+    return new Promise((resolve, reject) => {
+      db.query('UPDATE users SET avatar=?, bio=?, url=?, location=? WHERE userID = ?',
+      [this.avatar, this.bio, this.url, this.location, this.id], (err, result) => {
+        if (err) {
+          console.error('#### Error in saving profile fields', err);
+          reject(err);
+        } else if (result.affectedRows != 1) {
+          console.error('#### Failed to update user profile fields ',result);
+          reject('Failed to save profile fields');
+        } else {
+          resolve(this);
+        }
+      })
+    })
   }
 }
 
