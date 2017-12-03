@@ -566,7 +566,53 @@ describe('article routes', function() {
           expect(res.body.totalUpvotes).to.equal(1);
         });
       });
-      it('should return the total up votes a submissions when fetching a submission');
+      it('should return the total up votes a submissions when fetching a submission', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let u2 = await User.login(support.test_users.bambam.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id})
+        sub = await sub.create();
+        await (new Response(-1)).set({
+          articleSubmissionID: sub.id,
+          userID: u.id,
+          responseType: 'Upvote',
+          createdAt: new Date()
+        }).create();
+        await chai.request(a)
+        .get('/articles/53/submissions/'+sub.id)
+        .set('authorization', u.token)
+        .then((res) => {
+          expect(res).to.exist;
+          expect(res.status).to.equal(200);
+          expect(res.body.articleSubmissionID).to.equal(sub.id);
+          expect(res.body.userID).to.equal(u.id);
+          expect(res.body.userDisplayName).to.equal('Fred Flintstone');
+          expect(res.body.upvote).to.equal(true);
+          expect(res.body.totalUpvotes).to.equal(1);
+        });
+        await (new Response(-1)).set({
+          articleSubmissionID: sub.id,
+          userID: u2.id,
+          responseType: 'Upvote',
+          createdAt: new Date()
+        }).create();
+        await chai.request(a)
+        .get('/articles/53/submissions/'+sub.id)
+        .set('authorization', u2.token)
+        .then((res) => {
+          expect(res).to.exist;
+          expect(res.status).to.equal(200);
+          expect(res.body.articleSubmissionID).to.equal(sub.id);
+          expect(res.body.userID).to.equal(u.id);
+          expect(res.body.userDisplayName).to.equal('Fred Flintstone');
+          expect(res.body.upvote).to.equal(true);
+          expect(res.body.totalUpvotes).to.equal(2);
+        });
+      });
     });
   });
 });
