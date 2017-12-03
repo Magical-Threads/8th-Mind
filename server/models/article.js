@@ -215,6 +215,8 @@ class Article extends Base {
           let result = subs.map((s) => {
             let sub = new Submission(s["articleSubmissionID"]);
             sub.set(s);
+            sub.upvote = (s.userLiked == 'true');
+            sub.totalUpvotes = s.upvotes - s.downvotes;
             sub.set({submissionTitle: sub.title});  // compatibility
             return sub;
           })

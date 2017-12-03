@@ -9,6 +9,7 @@ export default Model.extend({
 	thumb: 				attr('string'),
 	userID: 			attr('number'),
 	dateCreated: 	attr('date'),
-	votes: 				attr('number'),
+	upvote: 			attr('boolean'),
+	votes:				attr('number'),
 	assets: 			hasMany('asset'),
 });

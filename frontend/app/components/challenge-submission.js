@@ -23,12 +23,9 @@ export default Ember.Component.extend({
 					assetID: asset.id },
 				backgoundReload: false});
 		},
-		handleUpvote() {
+		handleUpvote(submission) {
 
 		},
-		didInsertElement() {
-
-		}
 	},
 	'data-submission-id': null,
 });

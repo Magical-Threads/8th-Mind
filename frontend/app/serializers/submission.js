@@ -2,15 +2,18 @@ import DS from 'ember-data';
 
 export default DS.RESTSerializer.extend({
 	mapSubmissions(submission) {
+		console.log('@@@@ Normalizing submission: ',submission);
 		return {
 			id: 			    submission.articleSubmissionID,
-			title: 			  submission.submissionTitle,
+			title: 			  submission.title,
 			name: 			  submission.userDisplayName,
-			votes: 			  submission.upvotes,
+			votes:			  submission.totalUpvotes,
+			upvote:				submission.upvote,
 			userID: 		  submission.userID,
 			thumb: 			  submission.thumbUrl,
 			dateCreated: 	submission.createdAt,
 			articleID: 		submission.articleID,
+			userDisplayName: submission.userDisplayName,
 			links: {
 				assets: `/articles/${submission.articleID}/submissions/${submission.articleSubmissionID}`
 			}
@@ -43,11 +46,11 @@ export default DS.RESTSerializer.extend({
 		return this._super(store, primaryModelClass, payload, id, requestType);
 	},
 	normalizeSaveResponse(store, primaryModelClass, payload, id, requestType) {
-		// console.log('@@@@ Save response payload: ',payload,' id: ',id, ' requestType: ',requestType);
+		console.log('@@@@ Save response payload: ',payload,' id: ',id, ' requestType: ',requestType);
 		if (requestType === 'createRecord') {
 			return {data: {
 				type: 'submission',
-				attributes: payload.data,
+				attributes: this.mapSubmissions(payload.data),
 				id: payload.insertId
 			}};
 		} else {

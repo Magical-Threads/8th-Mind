@@ -44,7 +44,7 @@ export default ApplicationAdapter.extend({
 		console.log('@@@@ In handle response. Submission  Status: ',status,' headers: ',headers,' payload: ',payload);
 		if (payload && payload.success) {
 			if (payload.result) {
-				return payload.result;
+				return this._super(status, headers, payload.result, requestData);
 			} else {
 				return this._super(status, headers, payload, requestData);
 			}

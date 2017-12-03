@@ -421,10 +421,13 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
 						errors: [{title: "The submission title ("+submission.title+") must be at least 3 characters long."}]
 					});
 				} else {
-					await submission.create();
+					submission = await submission.create();
+					let u = await (new User(userID)).load();
+					await submission.loadVotes(u);
+					submission.userDisplayName = u.userFirstName+' '+u.userLastName;
 					res.status(200).json({
 						success: true,
-						data: submission,
+						data: submission.serialized,
 						insertId: submission.id
 					});
 				}

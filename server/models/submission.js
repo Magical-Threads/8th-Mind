@@ -1,7 +1,7 @@
 const db = require('../db');
 const Base = require('./base');
 const Asset = require('./asset');
-const Response = require('./Response')
+const Response = require('./response')
 
 /**
  * Class for submissions to articles.
