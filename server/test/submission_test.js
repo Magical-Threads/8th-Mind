@@ -1,15 +1,16 @@
-let mocha = require('mocha');
-let chai = require('chai');
-let expect = chai.expect;
-let chaiHttp = require('chai-http');
+const mocha = require('mocha');
+const chai = require('chai');
+const expect = chai.expect;
+const chaiHttp = require('chai-http');
 chai.use(chaiHttp);
-let support = require('./support');
+const support = require('./support');
 
-let db = require('../db');
-let Article = require('../models/article');
-let Submission = require('../models/submission');
-let User = require('../models/user');
-let Asset = require('../models/asset');
+const db = require('../db');
+const Article = require('../models/article');
+const Submission = require('../models/submission');
+const User = require('../models/user');
+const Asset = require('../models/asset');
+const Response = require('../models/response');
 
 describe('Submission', function() {
   before(async function() {
@@ -39,6 +40,8 @@ describe('Submission', function() {
     sub.status = sub2.status;
     sub.thumbUrl = sub2.thumbUrl;
     sub.createdAt = sub2.createdAt;
+    sub.updatedAt = sub2.updatedAt;
+    sub.userDisplayName = sub2.userDisplayName;
     expect(sub2.serialized).to.deep.equal(sub.serialized);
   });
   it('should be able to delete an existing submission', async function() {
@@ -77,5 +80,32 @@ describe('Submission', function() {
     asset = await asset.create();
     let assets = await sub.assets();
     expect(assets.length).to.equal(1);
+  });
+  it('should be able to load submission data', async function() {
+    let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+    let article = await (new Article(53)).load();
+    await article.enable_submissions();
+    let sub = new Submission(-1);
+    sub.set({
+      title: 'TESTING',
+      articleID: article.id, userID: u.id})
+    sub = await sub.create();
+    let sub2 = await (new Submission(sub.id)).load();
+    expect(sub2.id).to.equal(sub.id);
+    expect(sub2.userID).to.equal(u.id);
+    expect(sub2.userDisplayName).to.equal(u.userFirstName+' '+u.userLastName);
+    await sub2.loadVotes(u);
+    expect(sub2.upvote).to.equal(false);
+    expect(sub2.totalUpvotes).to.equal(0);
+    //
+    await (new Response(-1)).set({
+      articleSubmissionID: sub.id,
+      userID: u.id,
+      responseType: 'Upvote',
+      createdAt: new Date()
+    }).create();
+    await sub2.loadVotes(u);
+    expect(sub2.upvote).to.equal(true);
+    expect(sub2.totalUpvotes).to.equal(1);
   });
 });

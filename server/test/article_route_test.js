@@ -15,6 +15,7 @@ const Article = require('../models/article');
 const User = require('../models/user');
 const Submission = require('../models/submission');
 const Asset = require('../models/asset');
+const Response = require('../models/response');
 
 describe('article routes', function() {
   before(async function() {
@@ -25,6 +26,7 @@ describe('article routes', function() {
     await support.clear_submissions();
     await support.clear_assets();
     await support.clear_asset_storage();
+    await support.clear_responses();
   });
   describe('basic access', function() {
     it('should allow an article to be created');
@@ -216,7 +218,29 @@ describe('article routes', function() {
       // verify delete failed
       expect(await sub.load()).to.exist;
     });
-    it('should not be able to delete a submission without being logged in');
+    it('should not be able to delete a submission without being logged in', async function() {
+      let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+      let article = await (new Article(53)).load();
+      await article.enable_submissions();
+      let sub = new Submission(-1);
+      sub.set({
+        title: 'TESTING',
+        articleID: article.id, userID: u.id})
+      sub = await sub.create();
+      let asset = new Asset(-1);
+      asset.set({
+        articleSubmissionID: sub.id,
+        caption: 'TESTING',
+        assetPath: ''
+      });
+      asset = await asset.create();
+      await chai.request(a)
+      .delete('/articles/53/submissions/'+sub.id)
+      .catch(async (res) => {
+        expect(res).to.exist;
+        expect(res.status).to.equal(401);
+      });
+    });
     it('should not be able to delete a submission if it has assets', async function() {
       let u = await User.login(support.test_users.fred.userEmail, 'wilma');
       let article = await (new Article(53)).load();
@@ -406,6 +430,143 @@ describe('article routes', function() {
         })
       });
       it('should be able to return details of an asset for a submission');
+    });
+    describe('up/down vote routes', function() {
+      it('should be able to take an up vote for a user for a submission', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id})
+        sub = await sub.create();
+        await chai.request(a)
+        .post('/articles/53/submissions/'+sub.id+'/upvote')
+        .set('authorization', u.token)
+        .then((res) => {
+          expect(res).to.exist;
+          expect(res.status).to.equal(200);
+        });
+        let response = await sub.response_for(u);
+        expect(response).to.exist;
+        expect(response.responseType).to.equal('Upvote');
+      });
+      it('should reject an up vote by a user that already has an up vote for a submission', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id})
+        sub = await sub.create();
+        await (new Response(-1)).set({
+          articleSubmissionID: sub.id,
+          userID: u.id,
+          responseType: 'Upvote',
+          createdAt: new Date()
+        }).create();
+        await chai.request(a)
+        .post('/articles/53/submissions/'+sub.id+'/upvote')
+        .set('authorization', u.token)
+        .then((res) => {
+          expect(res).to.not.exist;
+        })
+        .catch((err) => {
+          expect(err).to.exist;
+          expect(err.response).to.exist;
+          expect(err.response.status).to.equal(422);
+        });
+      });
+      it('should allow deleting an up vote by a user for a submission', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id})
+        sub = await sub.create();
+        await (new Response(-1)).set({
+          articleSubmissionID: sub.id,
+          userID: u.id,
+          responseType: 'Upvote',
+          createdAt: new Date()
+        }).create();
+        await chai.request(a)
+        .delete('/articles/53/submissions/'+sub.id+'/upvote')
+        .set('authorization', u.token)
+        .then((res) => {
+          expect(res).to.exist;
+          expect(res.status).to.equal(200);
+        })
+        let response = await sub.response_for(u);
+        expect(response).to.not.exist;
+      });
+      it('should reject deleting an up vote by a user for a submission without an existing up vote', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id})
+        sub = await sub.create();
+        await chai.request(a)
+        .delete('/articles/53/submissions/'+sub.id+'/upvote')
+        .set('authorization', u.token)
+        .then((res) => {
+          expect(res).to.not.exist;
+        })
+        .catch((err) => {
+          expect(err).to.exist;
+          expect(err.response).to.exist;
+          expect(err.response.status).to.equal(404);
+        });
+      });
+      it('should return the vote status for the current user when fetching a submission', async function() {
+        let u = await User.login(support.test_users.fred.userEmail, 'wilma');
+        let u2 = await User.login(support.test_users.bambam.userEmail, 'wilma');
+        let article = await (new Article(53)).load();
+        await article.enable_submissions();
+        let sub = new Submission(-1);
+        sub.set({
+          title: 'TESTING',
+          articleID: article.id, userID: u.id})
+        sub = await sub.create();
+        await (new Response(-1)).set({
+          articleSubmissionID: sub.id,
+          userID: u.id,
+          responseType: 'Upvote',
+          createdAt: new Date()
+        }).create();
+        await chai.request(a)
+        .get('/articles/53/submissions/'+sub.id)
+        .set('authorization', u.token)
+        .then((res) => {
+          expect(res).to.exist;
+          expect(res.status).to.equal(200);
+          expect(res.body.articleSubmissionID).to.equal(sub.id);
+          expect(res.body.userID).to.equal(u.id);
+          expect(res.body.userDisplayName).to.equal('Fred Flintstone');
+          expect(res.body.upvote).to.equal(true);
+          expect(res.body.totalUpvotes).to.equal(1);
+        });
+        await chai.request(a)
+        .get('/articles/53/submissions/'+sub.id)
+        .set('authorization', u2.token)
+        .then((res) => {
+          expect(res).to.exist;
+          expect(res.status).to.equal(200);
+          expect(res.body.articleSubmissionID).to.equal(sub.id);
+          expect(res.body.userID).to.equal(u.id);
+          expect(res.body.userDisplayName).to.equal('Fred Flintstone');
+          expect(res.body.upvote).to.equal(false);
+          expect(res.body.totalUpvotes).to.equal(1);
+        });
+      });
+      it('should return the total up votes a submissions when fetching a submission');
     });
   });
 });

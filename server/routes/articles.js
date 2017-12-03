@@ -4,10 +4,13 @@ const h = require('../helpers');
 const db = require('../db');
 const formidable = require('formidable');
 const path = require('path');
+
 const Article = require('../models/article');
 const User = require('../models/user');
 const Submission = require('../models/submission');
 const Asset = require('../models/asset.js');
+const Response = require('../models/response.js');
+
 const config = require('../config/index');
 
 // configuration (should move to ENV or config file)
@@ -48,7 +51,7 @@ router.get('/articles', function(req, res) {
 	}
 });
 
-
+/* The following looks wrong on first read */
 router.post('/articles/submission_like/:id',h.ensureLogin, function(req, res){
     var userID=req.user.userID;
     var submissionID=req.params.id;
@@ -221,78 +224,38 @@ router.get('/articles/:id/usersubmissions/:userId', h.tokenDecode, function(req,
  * @author Ray Dollete <ray@raydollete.com>
  */
 router.get('/articles/:article/submissions/:id/', h.tokenDecode, function(req, res) {
+	try {
+		const subID = parseInt(req.params.id);
+		const userID = req.user.userID;
 
-	var subId = req.params.id;
-
-	// get main information about the submission
-	db.query("	SELECT S.userID, S.title, S.thumbUrl, S.createdAt," +
-		"		 IF(U.displayName IS NULL, CONCAT(U.userFirstName, ' ', U.userLastName), U.displayName)" +
-		"		  AS `userDisplayName`" +
-		"		FROM article_submission S" +
-		"		INNER JOIN users U" +
-		"		 ON S.userID = U.userID" +
-		"		WHERE articleSubmissionID = '" + subId + "' " +
-		"		LIMIT 1", function(err, sub) {
-
-		if (err) {
-			console.error(err.stack);
-			res.status(500).send('Error while querying database');
-		}
-		else {
-
-			// empty result set
-			if(sub.length == 0) {
-				// console.log('Empty set from query');
+		(new Submission(subID)).load().then(async (sub) => {
+			if (sub) {
+				await sub.loadVotes(new User(userID));
+				let data = sub.serialized;
+				let assets = (await sub.assets()).map(a => a.serialized);
+				data.assets = assets;
+				res.status(200).json(data);
+			} else {
 				res.status(404).json({
 					success: false,
-					errors: "Invalid articleSubmissionID ("+subId+")"
-				});
+					errors: [{title: 'Submission not found'}]
+				})
 			}
-			else {
-
-				// start building response object
-				var result = {
-					articleSubmissionID: subId,
-					userID: sub[0].userID,
-					userDisplayName: sub[0].userDisplayName,
-					title: sub[0].title,
-					thumbUrl: sub[0].thumbUrl,
-					createdAt: sub[0].createdAt
-				};
-
-				// console.log({result, sub})
-
-				// get asset data
-				db.query("	SELECT articleSubmissionAssetID, caption, assetType, assetPath, createdAt" +
-					"		FROM article_submission_asset" +
-					"		WHERE articleSubmissionID = '" + subId + "'" +
-					"		ORDER BY createdAt", function(err, assets) {
-
-					if (err) {
-						console.error(err.stack);
-						res.status(500).send('Error while querying database');
-					}
-					else {
-
-						// add assets array to the result object
-						result.assets = assets;
-
-						// send response
-						res.status(200).json(result);
-					}
-
-				}); // end asset query
-
-
-			}
-
-
-		}
-
-	}); // end main query
-
+		}).catch((err) => {
+			console.error('#### Error in request', err);
+			res.status(500).json({
+				success: false,
+				errors: [{title: 'Server Error'}]
+			});
+		});
+	} catch (err) {
+		console.error('#### Error in request', err);
+		res.status(500).json({
+			success: false,
+			errors: [{title: 'Server error'}]
+		})
+	}
 });
-
 
 /**
  * Update submission details (still pending, just updates submission metadata)
@@ -486,65 +449,43 @@ router.post('/articles/:id/submissions/new', h.ensureLogin, function(req, res) {
  */
 router.post('/articles/:article/submissions/:id/upvote', h.ensureLogin, function(req, res) {
 
-	var userID = req.user.userID;
-	var articleSubmissionID = req.params.id;
+	let userID = req.user.userID;
+	let articleSubmissionID = req.params.id;
 
-	console.log('@@@@ Create new upvote: ',userID,' article ',articleSubmissionID);
+	// console.log('@@@@ Create new upvote: ',userID,' article ',articleSubmissionID);
 
-	// validate the articleSubmissionID
-	db.query("	SELECT articleSubmissionID" +
-		"		FROM article_submission" +
-		"		WHERE articleSubmissionID = '"+articleSubmissionID+"'" +
-		"		LIMIT 1", function(err, check) {
-
-		// error handling
-		if(err || !Array.isArray(check)) {
-			console.error(err.stack);
-			res.status(200).json({
+	(new Submission(articleSubmissionID)).load().then(async (sub) => {
+		if (!sub) {
+			return res.status(404).json({
 				success: false,
-				errors: "Error while querying database."
+				errors: [{title: "The provided articleSubmissionID ("+articleSubmissionID+") is invalid."}]
 			});
 		}
-
-		// no articleID found
-		else if(check.length == 0) {
-			res.status(200).json({
+		let response = await sub.response_for(new User(userID));
+		if (response) {
+			return res.status(422).json({
 				success: false,
-				errors: "The provided articleSubmissionID ("+articleSubmissionID+") is invalid."
-			});
-
-		}
-
-		else {
-			var subResponse = {
-				articleSubmissionID: articleSubmissionID,
-				userID: userID,
-				responseType: 'Upvote'
-			};
-
-			db.query("INSERT INTO article_submission_response SET ?", subResponse, function (err, result) {
-
-				if(err) {
-					console.error(err.stack);
-					res.status(200).json({
-						success: false,
-						errors: "Error while inserting new record."
-					});
-				}
-
-				else {
-
-					res.status(200).json({
-						success: true,
-						data: subResponse,
-						insertId: result.insertId
-					});
-				}
+				errors: [{title: 'Duplicate upvote response'}]
 			});
 		}
-
-	});
-
+		response = await (new Response(-1)).set({
+			articleSubmissionID: articleSubmissionID,
+			userID: userID,
+			responseType: 'Upvote',
+			createdAt: new Date()
+		}).create();
+		res.status(200).json({
+			success: true,
+			data: response.serialized,
+			insertId: response.id
+		});
+	}).catch((err) => {
+		console.error('#### Error in processing upvote', err);
+		res.status(500).json({
+			success: false,
+			errors: [{title: 'Server error'}]
+		});
+	})
 });
 
 
@@ -557,39 +498,38 @@ router.post('/articles/:article/submissions/:id/upvote', h.ensureLogin, function
  */
 router.delete('/articles/:article/submissions/:id/upvote', h.ensureLogin, function(req, res) {
 
-	var userID = req.user.userID;
-	var articleSubmissionID = req.params.id;
+	const userID = req.user.userID;
+	const articleSubmissionID = req.params.id;
 
-	// delete the record
-	db.query("	DELETE FROM article_submission_response" +
-		"		WHERE articleSubmissionID = '"+articleSubmissionID+"'" +
-		"		 and userID = '"+userID+"'" +
-		"		LIMIT 1", function(err, result) {
-
-		if(err) {
-			console.error(err.stack);
-			res.status(500).send('Error while deleting record in database');
-		}
-		else {
-
-			// ensure row was deleted
-			if(result.affectedRows === 1) {
+	const sub = (new Submission(articleSubmissionID));
+	const u = (new User(userID));
+	sub.response_for(u).then((response) => {
+		if (response) {
+			response.delete().then(() => {
 				res.status(200).json({
 					success: true,
-					affectedRows: result.affectedRows
+					affectedRows: 1
 				});
-			}
-			else {
-				res.status(200).json({
+			}).catch((err) => {
+				console.error('#### Error in deleting upvote', err);
+				res.status(500).json({
 					success: false,
-					affectedRows: result.affectedRows
+					errors: [{title: 'Server error'}]
 				});
-			}
-
+			});
+		} else {
+			res.status(404).json({
+				success: false,
+				errors: [{title: 'No upvote found'}]
+			})
 		}
-
-
-	});
+	}).catch((err) => {
+		console.error('#### Error in deleting upvote', err);
+		res.status(500).json({
+			success: false,
+			errors: [{title: 'Server error'}]
+		});
+	})
 });
 
 /**

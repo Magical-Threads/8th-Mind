@@ -1,6 +1,7 @@
-let db = require('../db');
-let Base = require('./base');
-let Asset = require('./asset');
+const db = require('../db');
+const Base = require('./base');
+const Asset = require('./asset');
+const Response = require('./Response')
 
 /**
  * Class for submissions to articles.
@@ -36,13 +37,31 @@ class Submission extends Base {
    */
   async load() {
     return new Promise((resolve, reject) => {
-      db.query("SELECT * FROM article_submission WHERE articleSubmissionID = ?",
+      db.query("SELECT *, "+
+        " IF(U.displayName IS NULL, CONCAT(U.userFirstName, ' ', U.userLastName), U.displayName)" +
+    		"	  AS `userDisplayName` " +
+        "	FROM article_submission S" +
+        "	INNER JOIN users U" +
+    		"   ON S.userID = U.userID " +
+        " WHERE articleSubmissionID = ? LIMIT 1",
         this.id, (err, result) => {
           if (err) {
             console.log('#### error in database query: ',err);
             reject(err);
           } else if (result && result.length > 0) {
             let sub = this.set(result[0]);
+            // Delete user fields we do not want
+            delete sub.displayName;
+            delete sub.emailConfirmationToken;
+            delete sub.lastLogin;
+            delete sub.emailStatus;
+            delete sub.passwordResetToken;
+            delete sub.userFirstName;
+            delete sub.userLastName;
+            delete sub.userEmail;
+            delete sub.userPassword;
+            delete sub.userRole;
+            delete sub.userStatus;
             resolve(sub);
           } else {
             this._errors = ['Submission not found'];
@@ -50,6 +69,38 @@ class Submission extends Base {
           }
         })
     });
+  }
+  /**
+   * Load vote data for this submission relative to a specific user.  The fields
+   * upvote and totalVotes will be set relative to the provided user, and all users
+   * respectively.
+   * @param {User} user - the user for reference
+   */
+  async loadVotes(user) {
+    let c = await (new Promise((resolve, reject) => {
+      db.query("SELECT count(*) as c FROM article_submission_response "+
+        " WHERE articleSubmissionID = ? and userID = ?", [this.id, user.id], (err, result) => {
+          if (err) {
+            console.error('#### Error in query', err);
+            reject(err);
+          } else {
+            resolve(result[0].c);
+          }
+        })
+    }));
+    this.upvote = c > 0;
+    let tot = await (new Promise((resolve, reject) => {
+      db.query("SELECT count(*) as c FROM article_submission_response "+
+        " WHERE articleSubmissionID = ? and responseType = 'Upvote'", this.id, (err, result) => {
+          if (err) {
+            console.error('#### Error in query', err);
+            reject(err);
+          } else {
+            resolve(result[0].c);
+          }
+        })
+    }));
+    this.totalUpvotes = tot;
   }
   /**
    * Delete the submission from the database.
@@ -128,6 +179,27 @@ class Submission extends Base {
         }
       })
     })
+  }
+  /**
+   * Return the response for a given user.
+   * @param {User} user - the user to obtain the response
+   * @return {Reponse} - The response
+   */
+  async response_for(user) {
+    return new Promise((resolve, reject) => {
+      db.query('SELECT * FROM article_submission_response WHERE articleSubmissionID = ? and userID = ?',
+        [this.id, user.id], (err, result) => {
+        if (err) {
+          console.error('#### Error in database query', err);
+          reject(err);
+        } else if (result && result.length > 0) {
+          let response = new Response(result[0].articleSubmissionResponseID).set(result[0]);
+          resolve(response);
+        } else {
+          resolve(null);
+        }
+      });
+    });
   }
 }
 

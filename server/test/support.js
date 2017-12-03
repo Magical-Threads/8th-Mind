@@ -77,7 +77,17 @@ async function clear_asset_storage() {
         reject(err2);
       }
     });
-  })
+  });
+}
+
+async function clear_responses() {
+  await new Promise((resolve, reject) => {
+    db.query("DELETE FROM article_submission_response",
+      (err, results) => {
+      expect(err).to.not.exist;
+      resolve();
+    });
+  });
 }
 
 module.exports = {
@@ -86,5 +96,6 @@ module.exports = {
   clear_assets,
   register_users,
   test_users,
-  clear_asset_storage
+  clear_asset_storage,
+  clear_responses
 }
