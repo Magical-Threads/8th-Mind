@@ -7,6 +7,13 @@ export default Ember.Component.extend({
 	classNames: [
 		'challenge-submission'
 	],
+	upvoteCounterClass: Ember.computed('submission.upvote', function() {
+		if (this.get('submission.upvote')) {
+			return 'heart--like';
+		} else {
+			return 'heart--unlike';
+		}
+	}),
 	actions: {
 		deleteSubmission(article, submission, store) {
 			submission.destroyRecord({
