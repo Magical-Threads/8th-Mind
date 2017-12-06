@@ -208,13 +208,14 @@ class User extends Base {
   async subscribe() {
     return new Promise((resolve, reject) => {
       db.query("SELECT * FROM subscribers WHERE subscribeEmail = ?", this.userEmail,
-        function (err, suser) {
+        (err, suser) => {
         if (err) {
           console.error('#### Error in subscribing user', err);
           return reject(err);
         }
         if (suser.length==0) {
-          var ins={
+          let createdAt = new Date();
+          let ins={
             subscribeEmail:this.userEmail,
             createdAt:createdAt,
           };
