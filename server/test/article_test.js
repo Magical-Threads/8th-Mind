@@ -69,5 +69,45 @@ describe('Article', function() {
       expect(articles.map(a => a.articleTags)).to.deep.equal(
         ['Article', 'Article','Article', 'Article', 'Article']);
     })
+    it.only('can return a list of articles with a given tag on a page based on start date', async function() {
+      let art = await (new Article(37)).load();
+      await new Promise((resolve, reject) => {
+        db.query('UPDATE articles SET articleStartDate = ? WHERE articleID = 37',
+          new Date(1,1,3000), (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+      try {
+        let articles = await Article.articles_on_page(1,3, 'Article');
+        expect(articles).to.exist;
+        expect(articles.length).to.equal(3);
+        expect(articles.map(a => a.articleID)).to.deep.equal(
+          [56,53,51]);
+        expect(articles.map(a => a.articleTags)).to.deep.equal(
+          ['Article', 'Article','Article']);
+        articles = await Article.articles_on_page(2,5, 'Article');
+        expect(articles).to.exist;
+        expect(articles.length).to.equal(5);
+        expect(articles.map(a => a.articleID)).to.deep.equal(
+          [43, 40, 39, 35, 32]);
+        expect(articles.map(a => a.articleTags)).to.deep.equal(
+          ['Article', 'Article','Article', 'Article', 'Article']);
+      } finally {
+        await new Promise((resolve, reject) => {
+          db.query('UPDATE articles SET articleStartDate = ? WHERE articleID = 37',
+            art.articleStartDate, (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      }
+    })
   });
 })

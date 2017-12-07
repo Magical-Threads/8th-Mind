@@ -23,7 +23,7 @@ class Article extends Base {
     return new Promise((resolve, reject) => {
       db.query("	SELECT count(*) as total" +
     		"		FROM articles " +
-    		"		WHERE articles.articleStatus='Active'"+tag_phrase, (err, all) => {
+    		"		WHERE articles.articleStatus='Active' and articles.articleStartDate <= ? "+tag_phrase, new Date(), (err, all) => {
         if (err) {
           reject(err);
         } else {
