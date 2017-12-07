@@ -114,7 +114,7 @@ p {
 	}
 	.alert-warning {
 		color: $color-gray;
-		background: $color-yellow;	
+		background: $color-yellow;
 	}
 	.alert-success {
 		color: white;
@@ -1050,7 +1050,7 @@ aside {
 			padding: 0 vw(180);
 		}
 	}
-	
+
 	.post {
 		margin-bottom: vw(60);
 		@include bp(1) {
@@ -1245,6 +1245,12 @@ aside {
 			}
 		}
 		p.privacy a {
+			font-family: $font-bold;
+			&:hover {
+				color: $color-blue;
+			}
+		}
+		p.about a {
 			font-family: $font-bold;
 			&:hover {
 				color: $color-blue;

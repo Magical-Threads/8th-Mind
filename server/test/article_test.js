@@ -69,7 +69,7 @@ describe('Article', function() {
       expect(articles.map(a => a.articleTags)).to.deep.equal(
         ['Article', 'Article','Article', 'Article', 'Article']);
     })
-    it.only('can return a list of articles with a given tag on a page based on start date', async function() {
+    it('can return a list of articles with a given tag on a page based on start date', async function() {
       let art = await (new Article(37)).load();
       await new Promise((resolve, reject) => {
         db.query('UPDATE articles SET articleStartDate = ? WHERE articleID = 37',
