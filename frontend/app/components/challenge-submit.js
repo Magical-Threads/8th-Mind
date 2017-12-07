@@ -56,7 +56,7 @@ export default Ember.Component.extend({
 				return await rec.save({adapterOptions: {articleID: model.get('article.id')}})
 				.then(() => {
 					// Save succeeded - save the asset
-					// console.log('@@@@ Submision saved to id: ',rec.get('id'));
+					console.log('@@@@ Submision saved to id: ',rec.get('id'));
 					// console.log('@@@@ Asset caption data: ',this.get('assetCaptionData'));
 					this.set('errors', Ember.A());
 					this.set('submission', rec);
@@ -96,7 +96,7 @@ export default Ember.Component.extend({
 		},
 		// On upload failure display errors
 		async uploadError(err) {
-			console.log('#### Erorr in upload: ',err);
+			console.log('#### Erorr in upload: ',err, err.errors);
 			this.set('errors', Ember.A(err.errors));
 		}
 	}
