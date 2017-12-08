@@ -1,11 +1,11 @@
 /* eslint-env node */
 'use strict';
+/* global window */
 
 var express_domain = 'api.8thmind.com';
 var defaultMetaTags = require('ember-sharable');
 
 module.exports = function(environment) {
-
 	let ENV = {
 		modulePrefix: 'frontend',
 		serverPath: 'http://' + express_domain + '/',
@@ -67,7 +67,7 @@ module.exports = function(environment) {
 		// ENV.APP.LOG_TRANSITIONS = true;
 		// ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
 		// ENV.APP.LOG_VIEW_LOOKUPS = true;
-		// ENV.serverPath = "http://localhost:3000/"
+		ENV.serverPath = "http://localhost:3000/"
 	}
 
 	if (environment === 'test') {
@@ -79,11 +79,12 @@ module.exports = function(environment) {
 		ENV.APP.LOG_VIEW_LOOKUPS = false;
 
 		ENV.APP.rootElement = '#ember-testing';
-		ENV.serverPath = "http://localhost:3000/"
+		ENV.serverPath = "http://localhost:3001/"
 	}
 
 	if (environment === 'production') {
-
+		ENV.serverPath = 'https://' + express_domain + '/';
+		ENV.sharable.defaults.image = ENV.sharable.defaults.image.replace('http:','https:');
 	}
 
 	return ENV;

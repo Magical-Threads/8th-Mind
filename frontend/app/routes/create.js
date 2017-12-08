@@ -20,15 +20,12 @@ export default Ember.Route.extend(ResetScrollMixin, {
 		var url = (params['page']) ?
 			config.serverPath + 'articles/?tag=Create&per_page='+this.get('perPage')+'&page=' + params['page'] :
 			config.serverPath + 'articles/?tag=Create&per_page='+this.get('perPage');
-
 		return Ember.$.ajax({
 			method: "GET",
 			url: url,
 		}).then((result) => {
-			let createCategories = result.result
-			// .filter(categories => categories.articleTags === 'Create');
 			return Ember.RSVP.hash({
-				articles: createCategories,
+				articles: result.result,
 				pagination: result.pagination
 			});
 

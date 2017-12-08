@@ -5,11 +5,11 @@ import ResetScrollMixin from 'ember-cli-reset-scroll';
 export default Ember.Route.extend(ResetScrollMixin, {
 	title: '8th Mind: Challenges',
 	perPage: 4,
-	queryParams: {
-		page: {
-			refreshModel: true
-		}
-	},
+	// queryParams: {
+	// 	page: {
+	// 		refreshModel: true
+	// 	}
+	// },
 	resetScroll: 0,
 	beforeModel: function(transition) {
 		var loginController = this.controllerFor('login');
@@ -25,13 +25,10 @@ export default Ember.Route.extend(ResetScrollMixin, {
 			method: "GET",
 			url: url,
 		}).then((result) => {
-
-			let challengeCategories = result.result
-			// .filter(categories => categories.articleTags === 'Challenge');
-
+			let challenges = result.result
 			return Ember.RSVP.hash({
-				hasChallenges: challengeCategories.length > 0,
-				articles: challengeCategories,
+				hasChallenges: challenges.length > 0,
+				articles: challenges,
 				pagination: result.pagination
 			});
 
