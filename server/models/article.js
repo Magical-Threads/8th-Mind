@@ -52,6 +52,8 @@ class Article extends Base {
       tag_phrase = ' AND articles.articleTags=? ';
   		qparams.unshift(tag);
   	}
+    let d = new Date();
+    qparams.unshift(d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate());
 
   	// console.error("@@@@@@ tag: ",tag," phrase: ",tag_phrase);
 
@@ -63,12 +65,12 @@ class Article extends Base {
   		" articles.articleStartDate " +
   		" FROM articles " +
   		" LEFT JOIN users on articles.userID=users.userID " +
-  		" WHERE articles.articleStatus='Active' " +
+  		" WHERE articles.articleStatus='Active' and articles.articleStartDate <= ? " +
   		tag_phrase +
   		" ORDER BY articleStartDate DESC " +
   		" LIMIT ?,?";
 
-  	// console.log("@@@@ query string: '"+query+"'")
+  	// console.log("@@@@ query string: '"+query+"' params: ",qparams)
 
     return new Promise((resolve, reject) => {
     	db.query(query, qparams, (err, result) => {
@@ -77,6 +79,7 @@ class Article extends Base {
           reject(err);
         } else {
           let articles = result.map(r => (new Article(r.articleID)).set(r));
+          // console.log('@@@@ Matched articles: ',articles);
           resolve(articles);
         }
       });
