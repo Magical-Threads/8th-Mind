@@ -70,6 +70,7 @@ router.post('/register', function(req, res, next) {
               subject: 'Welcome to 8th Mind, '+user.userFirstName+'!',
               html: html
             }, function(err){
+              console.log('#### Error in sending email!');
               console.log(err);
             });
           });
