@@ -84,7 +84,7 @@
 		height: vw(32);
 		bottom: vw(-15); left: vw(33);
 		position: absolute;
-		// background: url(../assets/images/icon-equal-lime.svg) no-repeat 50% 50%/contain;
+		background: url(../assets/images/icon-equal-lime.svg) no-repeat 50% 50%/contain;
 		transform: rotate(90deg);
 		z-index: 1;
 		@include bp(1) {
