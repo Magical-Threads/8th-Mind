@@ -26,4 +26,5 @@ testem.log
 web.env
 
 *.tar.gz
+/storage
 
