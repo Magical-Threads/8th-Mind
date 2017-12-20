@@ -185,7 +185,7 @@
 
 		.post-aside-title {
 			@include bp(0) {
-			
+
 				padding: 0;
 				font-size: 3vw;
 				position: absolute;
@@ -270,7 +270,7 @@
 			font-size: 3vw;
 		}
 	}
-	
+
 	.article-challenge-date {
 		color: $color-orange;
 		.article-challenge-label {
@@ -311,7 +311,7 @@
 		margin-right: vw(5);
 		svg {
 			position: absolute;
-			top: 50%; 
+			top: 50%;
 			left: 50%;
 			fill:none;
 			stroke-miterlimit:10;
@@ -432,7 +432,7 @@
 		margin-bottom: vw(60);
 	}
 
-	
+
 }
 
 [data-page-type='challenge'] .article-icon svg {

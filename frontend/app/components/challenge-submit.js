@@ -1,6 +1,5 @@
 import Ember from 'ember';
 import ENV from 'frontend/config/environment'
-import config from './../config/environment';
 
 /* global jQuery */
 
@@ -35,6 +34,7 @@ export default Ember.Component.extend({
 	actions: {
 		// Before performing the upload craete the submission
 		async beforeUpload(store) {
+			console.log('@@@@ Environment: ',ENV);
 			this.set('errors', Ember.A());
 			let model = this.get('model');
 			let submission = this.get('submission');
@@ -83,7 +83,7 @@ export default Ember.Component.extend({
 					id: 			data.insertId,
 					caption: 	asset.caption,
 					type: 		asset.assetType,
-					image: 		`${config.serverPath}storage/submission/photo/${asset.assetPath}`,
+					image: 		`${ENV.serverPath}storage/submission/photo/${asset.assetPath}`,
 					assetID: 	asset.articleSubmissionAssetID
 				},
 				type: 'asset',

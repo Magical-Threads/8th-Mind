@@ -69,11 +69,15 @@ describe('Article', function() {
       expect(articles.map(a => a.articleTags)).to.deep.equal(
         ['Article', 'Article','Article', 'Article', 'Article']);
     })
-    it('can return a list of articles with a given tag on a page based on start date', async function() {
+    it('can return a list of articles with a given tag on a page based on start date future', async function() {
       let art = await (new Article(37)).load();
       await new Promise((resolve, reject) => {
+        let d = new Date();
+        d.setDate(d.getDate()+1);
+        // console.log('@@@@ Setting article start date to ',d);
         db.query('UPDATE articles SET articleStartDate = ? WHERE articleID = 37',
-          new Date(1,1,3000), (err, result) => {
+          // new Date(1,1,3000), (err, result) => {
+          d, (err, result) => {
           if (err) {
             reject(err);
           } else {
@@ -98,6 +102,52 @@ describe('Article', function() {
           ['Article', 'Article','Article', 'Article', 'Article']);
       } finally {
         await new Promise((resolve, reject) => {
+          // console.log('@@@@ Restoring start date of 37 to ',art.articleStartDate);
+          db.query('UPDATE articles SET articleStartDate = ? WHERE articleID = 37',
+            art.articleStartDate, (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      }
+    })
+    it('can return a list of articles with a given tag on a page based on start date present', async function() {
+      let art = await (new Article(37)).load();
+      await new Promise((resolve, reject) => {
+        let d = new Date();
+        // d.setDate(d.getDate()+1);
+        // console.log('@@@@ Setting article start date to ',d);
+        db.query('UPDATE articles SET articleStartDate = ? WHERE articleID = 37',
+          // new Date(1,1,3000), (err, result) => {
+          d, (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+      try {
+        let articles = await Article.articles_on_page(1,3, 'Article');
+        expect(articles).to.exist;
+        expect(articles.length).to.equal(3);
+        expect(articles.map(a => a.articleID)).to.deep.equal(
+          [37, 56, 53]);
+        expect(articles.map(a => a.articleTags)).to.deep.equal(
+          ['Article', 'Article','Article']);
+        articles = await Article.articles_on_page(2,5, 'Article');
+        expect(articles).to.exist;
+        expect(articles.length).to.equal(5);
+        expect(articles.map(a => a.articleID)).to.deep.equal(
+          [49, 43, 40, 39, 35]);
+        expect(articles.map(a => a.articleTags)).to.deep.equal(
+          ['Article', 'Article','Article', 'Article', 'Article']);
+      } finally {
+        await new Promise((resolve, reject) => {
+          // console.log('@@@@ Restoring start date of 37 to ',art.articleStartDate);
           db.query('UPDATE articles SET articleStartDate = ? WHERE articleID = 37',
             art.articleStartDate, (err, result) => {
             if (err) {

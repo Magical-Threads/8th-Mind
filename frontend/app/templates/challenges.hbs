@@ -1,33 +1,36 @@
 <section class="page-article-categories">
 	<div class="page-articles-container">
 		<div class="page-articles-wrap">
-			{{#each model.articles as |article index|}}
-				<div class="page-articles-row">
-					<div class="post">
-						<div class="post-thumb">
-							{{#link-to "article" article.articleID}}
-								<figure style='background-image: url({{serverURL}}storage/articles/{{article.articleImage}})'></figure>
-							{{/link-to}}
-						</div>
-						<div class="post-text">
-							{{#link-to "article" article.articleID}}
-								<h3>{{article.articleTitle}}</h3>
-							{{/link-to}}
-							<p>{{{short-desc article.articleDescription len="200"}}} </p>
+			{{#infinite-scroller trigger-at="80%" use-document=true on-load-more=(action 'loadMore') as |scroller|}}
+				{{#each model.articles as |article index|}}
+					<div class="page-articles-row">
+						<div class="post">
+							<div class="post-thumb">
+								{{#link-to "article" article.articleID}}
+									<figure style='background-image: url({{serverURL}}storage/articles/{{article.articleImage}})'></figure>
+								{{/link-to}}
+							</div>
+							<div class="post-text">
+								{{#link-to "article" article.articleID}}
+									<h3>{{article.articleTitle}}</h3>
+								{{/link-to}}
+								<p>{{{short-desc article.articleDescription len="200"}}} </p>
+							</div>
 						</div>
 					</div>
-				</div>
-			{{/each}}
+				{{/each}}
+				{{if scroller.isLoading 'Please wait...'}}
+			{{/infinite-scroller}}
 		</div>
-		{{#each model.pagination as |pagination index|}}
+		<!-- {{!#each model.pagination as |pagination index|}}
 			<ul class="pagination">
-				{{#if (gt pagination.page 1)}}
-					<button class='button button-teal' {{action "prevPage"}}>Prev</button>
-				{{/if}}
-				{{#if (lt pagination.page pagination.total_pages)}}
-					<button class='button button-teal' {{action "nextPage"}}>Next</button>
-				{{/if}}
+				{{!#if (gt pagination.page 1)}}
+					<button class='button button-teal' {{!action "prevPage"}}>Prev</button>
+				{{!/if}}
+				{{!#if (lt pagination.page pagination.total_pages)}}
+					<button class='button button-teal' {{!action "nextPage"}}>Next</button>
+				{{!/if}}
 			</ul>
-		 {{/each}}
+		 {{!/each}} -->
 	</div>
 </section>
