@@ -12,7 +12,7 @@
 						submission=submission
 						session=model.session
 					}}
-					
+
 				{{/if}}
 			{{/each}}
 		{{/if}}
@@ -28,9 +28,15 @@
 {{#if model.article.allowSubmission}}
 
 	{{article-countdown-timer article=model.article}}
-	{{#link-to "article.gallery" model.article.articleID }}
-		<button class='button button-orange'>Submit Your Entry</button>
-	{{/link-to}}
+	{{#if session.isAuthenticated}}
+		{{#link-to "article.gallery" model.article.articleID }}
+			<button class='button button-orange'>Submit Your Entry</button>
+		{{/link-to}}
+	{{else}}
+		{{#link-to 'login'}}
+			<button class='button button-orange'>Login to Submit Your Entry</button>
+		{{/link-to}}
+	{{/if}}
 
 {{/if}}
 
