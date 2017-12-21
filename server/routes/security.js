@@ -65,13 +65,17 @@ router.post('/register', function(req, res, next) {
             firstName: user.userFirstName
           }, function(err ,html) {
             transport.sendMail({
-              from: '8th Mind <postmaster@mg.8thmind.com>',
+              from: '8th Mind <noreply@8thmind.com>',
               to: user.userEmail,
               subject: 'Welcome to 8th Mind, '+user.userFirstName+'!',
               html: html
-            }, function(err){
-              console.log('#### Error in sending email!');
-              console.log(err);
+            }, function(err, info){
+              if (err) {
+                console.log('#### Error in sending email!');
+                console.log(err);
+              } else {
+                console.log('@@@@ Mail sent', info);
+              }
             });
           });
           if (subscribeCheck) {
