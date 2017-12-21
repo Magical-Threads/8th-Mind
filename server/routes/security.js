@@ -57,6 +57,7 @@ router.post('/register', function(req, res, next) {
           console.log('@@@@ Register returned null');
           return res.status(422).json({success: false, errors: "unable to register"});
         } else if (user.errors) {
+          console.log('@@@@ Errors registering user ',user.errors);
           return res.status(422).json({success: false, errors: user.errors});
         } else {
           res.render('emails/activation', {
