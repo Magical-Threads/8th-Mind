@@ -38,21 +38,26 @@ class Article extends Base {
    * @param {int} page - The page to retrieve
    * @param {int} per_page - The number of entries per page
    * @param {string} tag - optional tag value to limit results to
+   * @param {int} time - The hour 0-23 (time of day) articles are started on their start date
    * @return {Article[]} - articles matching the tag on the specified page
    */
-  static async articles_on_page(page, per_page, tag) {
+  static async articles_on_page(page, per_page, tag, time) {
     if (!page || page < 1) { page = 1; }
   	if (!per_page) { per_page = 10; }
 
-  	var offset = (page - 1) * per_page;
-  	var qparams = [offset, per_page];
+  	let offset = (page - 1) * per_page;
+  	let qparams = [offset, per_page];
 
-  	var tag_phrase = '';
+  	let tag_phrase = '';
   	if (tag) {
       tag_phrase = ' AND articles.articleTags=? ';
   		qparams.unshift(tag);
   	}
+    time = time ? time : 9
     let d = new Date();
+    if (d.getHours() < time) {
+      d.setDate(d.getDate()-1);
+    }
     qparams.unshift(d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate());
 
   	// console.error("@@@@@@ tag: ",tag," phrase: ",tag_phrase);

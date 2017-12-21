@@ -21,14 +21,16 @@ const storageDir = config.storageDir;
  *
  * @param {int} per_page - number of articles to show on a page
  * @param {int} page - which page of content to show
+ * @param {int} time - hour in which articles are available on their start date (default 9am)
  */
 router.get('/articles', function(req, res) {
 	try {
 		const page = parseInt(req.query.page) || 1;
 		const per_page = parseInt(req.query.per_page) || 10;
 		const tag = req.query.tag;
+		const time = req.query.time ? parseInt(req.query.time) : 9
 
-		Article.articles_on_page(page, per_page, tag).then((articles) => {
+		Article.articles_on_page(page, per_page, tag, time).then((articles) => {
 			Article.count(tag).then((total) => {
 				let pagination=[];
 				let total_pages = total / per_page;
