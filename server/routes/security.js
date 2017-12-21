@@ -74,8 +74,8 @@ router.post('/register', function(req, res, next) {
               if (err) {
                 console.log('#### Error in sending email!');
                 console.log(err);
-              } else {
-                console.log('@@@@ Mail sent', info);
+              // } else {
+              //   console.log('@@@@ Mail sent', info);
               }
             });
           });

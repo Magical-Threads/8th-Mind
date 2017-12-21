@@ -20,8 +20,8 @@ var transporter = nodemailer.createTransport({
         user: process.env.MAIL_USERNAME,
         pass: process.env.MAIL_PASSWORD
     },
-    logger: true,
-    debug: true
+    // logger: true,
+    // debug: true
 });
 
 
