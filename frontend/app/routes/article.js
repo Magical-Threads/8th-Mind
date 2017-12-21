@@ -19,7 +19,7 @@ export default Ember.Route.extend(ResetScrollMixin, {
 		loginController.set('previousTransition', transition);
 	},
 	setMetaData(article) {
-	
+
 		let url = `http://8thmind.com/article/${article.articleID}`;
 		let title = article.title;
 		let image = `${config.serverPath}storage/articles/${article.image}`;
@@ -34,7 +34,7 @@ export default Ember.Route.extend(ResetScrollMixin, {
 		this.set('ogImage', image);
 		this.set('ogUrl', url);
 		this.set('ogDescription', description);
-		
+
 		this.set('headData.title', title);
 		this.set('headData.url', url);
 		this.set('headData.image', image);
@@ -44,14 +44,14 @@ export default Ember.Route.extend(ResetScrollMixin, {
 		this.setMetaData(model.article.data);
 	},
 	model(params) {
-		
+
 		this.set('params', params);
-		
+
 		const articleID = params.articleID;
-		const randomPage = Math.round(Math.random() * 6);
+		const randomPage = Math.round(Math.random() * 3);
 		return Ember.RSVP.hash({
 			article: this.store.findRecord('article', articleID),
-			related: this.store.query('article', { page: randomPage, per_page: 3 })
+			related: this.store.query('article', { page: randomPage, per_page: 6 })
 		});
 	},
 	setupController(controller, model) {

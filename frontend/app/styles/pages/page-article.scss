@@ -633,3 +633,24 @@
 		}
 	}
 }
+
+.related-row {
+	display: inline-block;
+	width: 100%;
+	[mobile] {
+		display: none;
+		@include bp(1) {
+			display: block;
+		}
+	}
+	@include bp(1) {
+		width: 100%;
+		padding: 0;
+		max-width: 100%;
+		margin: 0 auto;
+	}
+	.post {
+		width: 33%;
+		display: inline-block;
+	}
+}
