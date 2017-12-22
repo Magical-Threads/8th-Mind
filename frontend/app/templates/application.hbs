@@ -18,7 +18,9 @@
 		<nav class='header-nav login-register'>
 			{{#if session.isAuthenticated}}
 				<div class='login-register-loggedin'>
-					<span class='name'>{{session.data.authenticated.userFirstName}} {{session.data.authenticated.userLastName}}</span>
+					{{#link-to 'profile'}}
+						<span class='name'>{{session.data.authenticated.userFirstName}} {{session.data.authenticated.userLastName}}</span>
+					{{/link-to}}
 					{{#link-to 'change-password'}}<span class='button'>Change Password</span>{{/link-to}}
 					<a {{action 'logout'}} href='#'><span class='button'>Logout</span></a>
 				</div>

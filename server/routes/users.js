@@ -167,23 +167,53 @@ router.post('/users/reset-password-process/', function(req, res, next){
     }
 
 });
+router.put('/users/:id', h.ensureLogin, function(req,res) {
+  var userID=req.user.userID;
+  if (userID != req.params.id) {
+    return res.status(401).json({success: false, errors: [{title: 'Invalid profile access'}]});
+  }
+  (new User(userID)).load().then(async (u) => {
+    let keys = Object.keys(req.body.user).filter(
+      k => ['userFirstName', 'userLastName', 'userEmail', 'avatar', 'bio', 'location', 'url'].includes(k));
+    for (let k of keys) {
+      let field = {};
+      field[k] = req.body.user[k];
+      u.set(field);
+    }
+    await u.save();
+    res.status(200).json({user: u.serialized});
+  }).catch(async (err) => {
+    console.error('#### Error in updating user: ',err);
+    res.status(500).json({success: false, errors: [{title: err}]})
+  })
+});
 router.get('/users/:id', h.ensureLogin, function(req, res){
-    var userID=req.user.userID;
-     db.query("SELECT * FROM users WHERE userID = '"+userID+"'", function (err, user, fields) {
-                user = {
-                userID: user[0].userID,
-                userFirstName:user[0].userFirstName,
-				userLastName:user[0].userLastName,
-                userEmail: user[0].userEmail,
-                };
+  var userID=req.user.userID;
+  if (userID != req.params.id) {
+    return res.status(401).json({success: false, errors: [{title: 'Invalid profile access'}]});
+  }
+  db.query("SELECT * FROM users WHERE userID = ?", userID, function (err, user, fields) {
+    if (err) {
+      console.error('#### Error in query: ',err);
+      res.status(500).json({success: false, errors: [{title: err}]})
+    } else {
+      user = {
+        userID: user[0].userID,
+        userFirstName:user[0].userFirstName,
+        userLastName:user[0].userLastName,
+        userEmail: user[0].userEmail,
+        avatar: user[0].avatar,
+        bio: user[0].bio,
+        location: user[0].location,
+        url: user[0].url
+      };
 
-                res.status(200).json({
-                                success: true,
-                                error:false,
-                                data: user,
-                             });
-
-              });
-
+      res.status(200).json({
+        success: true,
+        error:false,
+        data: user,
+      });
+    }
+  });
 });
 module.exports = router;

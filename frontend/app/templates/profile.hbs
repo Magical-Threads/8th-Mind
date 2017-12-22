@@ -1,0 +1,13 @@
+<section id='page-profile'>
+{{#em-form model=model as |form|}}
+    {{form.input label="First Name" property="firstName"}}
+    {{form.input label="Last Name" property="lastName"}}
+    {{form.input label="Email" property="email"}}
+    {{form.input label="URL" property="url"}}
+    {{form.input label="Location" property="location"}}
+    {{form.input label="Avatar" property="avatar"}}
+    {{form.text label="Bio" property="bio"}}
+{{/em-form}}
+</section>
+
+{{outlet}}

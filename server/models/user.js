@@ -253,8 +253,8 @@ class User extends Base {
    */
   async save() {
     return new Promise((resolve, reject) => {
-      db.query('UPDATE users SET avatar=?, bio=?, url=?, location=? WHERE userID = ?',
-      [this.avatar, this.bio, this.url, this.location, this.id], (err, result) => {
+      db.query('UPDATE users SET userFirstName=?, userLastName=?, userEmail=?, avatar=?, bio=?, url=?, location=? WHERE userID = ?',
+      [this.userFirstName, this.userLastName, this.userEmail, this.avatar, this.bio, this.url, this.location, this.id], (err, result) => {
         if (err) {
           console.error('#### Error in saving profile fields', err);
           reject(err);
