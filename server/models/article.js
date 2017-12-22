@@ -60,7 +60,8 @@ class Article extends Base {
     }
     qparams.unshift(d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate());
 
-  	// console.error("@@@@@@ tag: ",tag," phrase: ",tag_phrase);
+  	// console.warn("@@@@@@ tag: ",tag," phrase: ",tag_phrase);
+    console.warn('@@@@ Time filter: ',time,' params: ',qparams)
 
   	// todo: determine if we still need a left join here (will there ever be orphan articles with no userID?) -RJD
   	let query = "SELECT articles.articleID, articles.articleTitle, "+
