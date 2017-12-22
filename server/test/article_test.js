@@ -115,7 +115,7 @@ describe('Article', function() {
       }
     })
     it('can return a list of articles with a given tag on a page based on start date present after start time', async function() {
-      let time = (new Date()).getHours()-1;
+      let time = (new Date()).getHours()-2;
       let art = await (new Article(37)).load();
       await new Promise((resolve, reject) => {
         let d = new Date();
@@ -139,7 +139,7 @@ describe('Article', function() {
           [37, 56, 53]);
         expect(articles.map(a => a.articleTags)).to.deep.equal(
           ['Article', 'Article','Article']);
-        articles = await Article.articles_on_page(2,5, 'Article');
+        articles = await Article.articles_on_page(2,5, 'Article', time);
         expect(articles).to.exist;
         expect(articles.length).to.equal(5);
         expect(articles.map(a => a.articleID)).to.deep.equal(
@@ -161,7 +161,7 @@ describe('Article', function() {
       }
     })
     it('can return a list of articles with a given tag on a page based on start date present before start time', async function() {
-      let time = (new Date()).getHours()+1;
+      let time = (new Date()).getHours()+2;
       let art = await (new Article(37)).load();
       await new Promise((resolve, reject) => {
         let d = new Date();
@@ -185,11 +185,11 @@ describe('Article', function() {
           [56, 53, 51]);
         expect(articles.map(a => a.articleTags)).to.deep.equal(
           ['Article', 'Article','Article']);
-        articles = await Article.articles_on_page(2,5, 'Article');
+        articles = await Article.articles_on_page(2,5, 'Article', time);
         expect(articles).to.exist;
         expect(articles.length).to.equal(5);
         expect(articles.map(a => a.articleID)).to.deep.equal(
-          [49, 43, 40, 39, 35]);
+          [43, 40, 39, 35, 32]);
         expect(articles.map(a => a.articleTags)).to.deep.equal(
           ['Article', 'Article','Article', 'Article', 'Article']);
       } finally {

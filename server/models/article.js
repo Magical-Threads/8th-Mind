@@ -55,7 +55,8 @@ class Article extends Base {
   	}
     time = (time ? time : 9)
     let d = new Date();
-    if (d.getHours()-8 < time) {  // -8 to offset for PDT vs server UTC
+    let tz = d.getTimezoneOffset() == 0 ? -8 : 0 // offset for PDT if server is UTC
+    if (d.getHours()+tz < time) {
       d.setDate(d.getDate()-1);
     }
     qparams.unshift(d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate());
