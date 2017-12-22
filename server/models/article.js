@@ -53,7 +53,7 @@ class Article extends Base {
       tag_phrase = ' AND articles.articleTags=? ';
   		qparams.unshift(tag);
   	}
-    time = time ? time : 9
+    time = (time ? time : 9)-8 // offset for PDT vs UTC server time
     let d = new Date();
     if (d.getHours() < time) {
       d.setDate(d.getDate()-1);
